@@ -81,7 +81,8 @@ static inline void yk_ijk_impl(const int l, const DiracSpinor &Fa,
     vabk[i] = Ax * du;
   }
 
-  const auto bmax = std::min(std::min(Fa.max_pt(), Fb.max_pt()), num_points - 1);
+  const auto bmax =
+      std::min(std::min(Fa.max_pt(), Fb.max_pt()), num_points - 1);
   for (auto i = bmax; i >= 1; --i) {
     Bx = Bx * powk(r[i - 1] / r[i]) + ff(i - 1);
     vabk[i - 1] += Bx * du;
@@ -275,8 +276,10 @@ double Rk_abcd(const DiracSpinor &Fa, const DiracSpinor &Fc,
   const auto &drdu = Fa.rgrid->drdu();
   const auto i0 = std::max(Fa.min_pt(), Fc.min_pt());
   const auto imax = std::min(Fa.max_pt(), Fc.max_pt());
-  const auto Rff = NumCalc::integrate(1.0, i0, imax, Fa.f(), Fc.f(), yk_bd, drdu);
-  const auto Rgg = NumCalc::integrate(1.0, i0, imax, Fa.g(), Fc.g(), yk_bd, drdu);
+  const auto Rff =
+      NumCalc::integrate(1.0, i0, imax, Fa.f(), Fc.f(), yk_bd, drdu);
+  const auto Rgg =
+      NumCalc::integrate(1.0, i0, imax, Fa.g(), Fc.g(), yk_bd, drdu);
   return (Rff + Rgg) * Fa.rgrid->du();
 }
 

@@ -748,7 +748,8 @@ void HartreeFock::vex_psia_core(const DiracSpinor &Fa, DiracSpinor &VxFa) const
 // ..... i.e., must be core orbital
 {
   [[maybe_unused]] auto sp = IO::Profile::safeProfiler(__func__);
-  VxFa.set_max_pt() = Fa.f().size(); // silly hack. Make sure VxFa = 0 after pinf
+  VxFa.set_max_pt() =
+      Fa.f().size(); // silly hack. Make sure VxFa = 0 after pinf
   VxFa *= 0.0;
   VxFa.set_max_pt() = Fa.max_pt(); // updated below
 
