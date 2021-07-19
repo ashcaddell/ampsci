@@ -246,7 +246,7 @@ helper::compare_QED(const std::vector<QEDData> &QEDdata,
       // Calculate first-order Uehling shift (matrix element):
       const auto de0 = h.radialIntegral(*Fv, *Fv);
       // Find Hartree-Fock Uehling shift:
-      const auto de = Fv->en - Fv0->en;
+      const auto de = Fv->en() - Fv0->en();
       // print results:
       printf("%4s | %10.3e [%10.3e] | %10.3e [%10.3e]", state.c_str(), de0,
              t_de0, de, t_de);

@@ -102,7 +102,7 @@ int ContinuumOrbitals::solveLocalContinuum(double ec, int min_l, int max_l)
       break;
 
     auto &phi = orbitals.emplace_back(0, kappa, rgrid);
-    phi.en = ec;
+    phi.set_en() = ec;
     DiracODE::solveContinuum(phi, ec, vc, cgrid, r_asym, alpha);
 
     // Include (approximate) exchange

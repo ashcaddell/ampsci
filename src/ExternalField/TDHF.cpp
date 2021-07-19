@@ -313,12 +313,12 @@ double TDHF::dV(const DiracSpinor &Fn, const DiracSpinor &Fm, bool conj,
 }
 
 double TDHF::dV(const DiracSpinor &Fn, const DiracSpinor &Fm) const {
-  const auto conj = Fm.en > Fn.en;
+  const auto conj = Fm.en() > Fn.en();
   return dV(Fn, Fm, conj);
 }
 
 double TDHF::dV1(const DiracSpinor &Fn, const DiracSpinor &Fm) const {
-  const auto conj = Fm.en > Fn.en;
+  const auto conj = Fm.en() > Fn.en();
   return dV(Fn, Fm, conj, nullptr, false);
 }
 

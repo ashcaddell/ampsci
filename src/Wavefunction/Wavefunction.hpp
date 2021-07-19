@@ -111,7 +111,7 @@ public: // const methods: "views" into WF object
     const auto v =
         std::min_element(cbegin(valence), cend(valence), DiracSpinor::comp_en);
     if (c != cend(core) && v != cend(valence))
-      return v->en - c->en;
+      return v->en() - c->en();
     return 0.0;
   }
 

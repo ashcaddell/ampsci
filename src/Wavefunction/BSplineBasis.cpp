@@ -129,10 +129,10 @@ std::vector<DiracSpinor> form_basis(const Parameters &params,
     if (prev == basis.end())
       continue;
     auto nmc2 = -1.0 / (wf.alpha * wf.alpha);
-    if (Fp.en < prev->en && Fp.en > nmc2) {
+    if (Fp.en() < prev->en() && Fp.en() > nmc2) {
       // XXX Better: count nodes? ['Spurious node at large r?']
       std::cout << "WARNING: "
-                << "Spurious state?? " << Fp.symbol() << " " << Fp.en << "\n";
+                << "Spurious state?? " << Fp.symbol() << " " << Fp.en() << "\n";
       // Fp *= 0.0;
     }
   }
@@ -336,7 +336,7 @@ void expand_basis_orbitals(std::vector<DiracSpinor> *basis,
     auto &Fi = (positive_energy)
                    ? basis->emplace_back(pqn, kappa, wf.rgrid)
                    : basis_positron->emplace_back(pqn_pstrn, kappa, wf.rgrid);
-    Fi.en = en;
+    Fi.set_en() = en;
     Fi.set_min_pt() = spl_basis[0].max_pt(); // yes, backwards (updated below)
     Fi.set_max_pt() = spl_basis[0].min_pt();
     auto sign = pvec[0] > 0 ? 1 : -1; // mostly, but not completely, works
@@ -378,7 +378,7 @@ std::vector<double> sumrule_TKR(const std::vector<DiracSpinor> &basis,
       if (f == 0)
         continue;
       const auto Ran = Fa * (r * Fn);
-      const auto term = f * (Fn.en - Fa.en) * Ran * Ran / (2 * l + 1);
+      const auto term = f * (Fn.en() - Fa.en()) * Ran * Ran / (2 * l + 1);
       if (Fn.n > 0)
         sum_el += term;
       else
@@ -424,7 +424,7 @@ std::vector<double> sumrule_DG(int nDG, const std::vector<DiracSpinor> &basis,
     //   std::cout << "kappa: " << kappa << " (" << Fa.symbol() << ")\n";
     auto sum = 0.0;
     for (const auto &Fn : basis) {
-      const auto w = Fn.en - Fa.en;
+      const auto w = Fn.en() - Fa.en();
       const auto Ran = rhat.reducedME(Fa, Fn);
       const double c = 1.0 / (2 * std::abs(Fa.k));
       const auto term = std::pow(w, nDG) * Ran * Ran * c;

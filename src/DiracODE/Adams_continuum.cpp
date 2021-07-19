@@ -35,7 +35,7 @@ void solveContinuum(DiracSpinor &Fa, const double en,
 {
   // guess as asymptotic region:
   auto i_asym = ext_grid.getIndex(r_asym0);
-  Fa.en = en;
+  Fa.set_en() = en;
 
   const auto num_pointsb = Fa.rgrid->num_points();
   const auto num_pointsc = ext_grid.num_points();
@@ -46,7 +46,7 @@ void solveContinuum(DiracSpinor &Fa, const double en,
   Fa.set_f().resize(num_pointsc); // nb: this is a little dangerous!
   Fa.set_g().resize(num_pointsc);
 
-  DiracMatrix Hd(ext_grid, v, Fa.k, Fa.en, alpha, {});
+  DiracMatrix Hd(ext_grid, v, Fa.k, Fa.en(), alpha, {});
   outwardAM(Fa.set_f(), Fa.set_g(), Hd, (int)num_pointsc - 1);
 
   // Find a better (lower) asymptotic region:
@@ -62,7 +62,7 @@ void solveContinuum(DiracSpinor &Fa, const double en,
   // eps = Sqrt[en/(en+2mc^2)]
   const double al2 = std::pow(alpha, 2);
   // c*eps = eps/alpha
-  const double ceps = std::sqrt(Fa.en / (Fa.en * al2 + 2.));
+  const double ceps = std::sqrt(Fa.en() / (Fa.en() * al2 + 2.));
   const double D = 1.0 / std::sqrt(M_PI * ceps);
   const double sf = D / amp; // re-scale factor
 

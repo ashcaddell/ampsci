@@ -53,7 +53,7 @@ DiracSpinor TDHFbasis::form_dPsi(const DiracSpinor &Fv, const double omega,
     const auto hnc = incl_dV
                          ? s2 * s * (m_h->reducedME(Fn, Fv) + dV(Fn, Fv, conj))
                          : s2 * s * m_h->reducedME(Fn, Fv);
-    Xx += (hnc / (Fv.en - Fn.en + ww)) * Fn;
+    Xx += (hnc / (Fv.en() - Fn.en() + ww)) * Fn;
   }
 
   return Xx;
@@ -78,7 +78,7 @@ TDHFbasis::form_dPsis(const DiracSpinor &Fv, const double omega, dPsiType XorY,
 //******************************************************************************
 double TDHFbasis::dV1(const DiracSpinor &Fa, const DiracSpinor &Fb) const {
   //
-  const auto conj = Fb.en > Fa.en;
+  const auto conj = Fb.en() > Fa.en();
   // dV(Fn, Fm, conj, nullptr, false);
   const auto s = conj && m_h->imaginaryQ() ? -1 : 1; // careful. OK?
   // auto rhs = dV_rhs(Fa.k, Fb, conj, nullptr, false);

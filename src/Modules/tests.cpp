@@ -81,8 +81,8 @@ void basisTests(const Wavefunction &wf) {
     const bool hfQ = hf_phi != nullptr;
     const auto Ahf = hfQ ? DiracOperator::HyperfineA::hfsA(&hfs, *hf_phi) : 0.0;
     const auto Ab = DiracOperator::HyperfineA::hfsA(&hfs, Fn);
-    const auto Eb = Fn.en;
-    const auto Ehf = hfQ ? hf_phi->en : 0.0;
+    const auto Eb = Fn.en();
+    const auto Ehf = hfQ ? hf_phi->en() : 0.0;
 
     // const auto nodes = Helper::countNodes(Fn);
     // const int expected_nodes = Fn.n - Fn.l() - 1;
@@ -179,7 +179,7 @@ void Module_Tests_Hamiltonian(const Wavefunction &wf) {
       if (tmp_orbs != &wf.core && wf.getSigma() != nullptr) {
         Haa += psi * (*wf.getSigma())(psi);
       }
-      double ens = psi.en;
+      double ens = psi.en();
       double fracdiff = (Haa - ens) / ens;
       printf("<%2i% i|H|%2i% i> = %17.11f, E = %17.11f; % .0e\n", psi.n, psi.k,
              psi.n, psi.k, Haa, ens, fracdiff);

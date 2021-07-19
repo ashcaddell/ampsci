@@ -371,8 +371,8 @@ void FeynmanSigma::setup_omega_grid() {
   for (const auto &Fc : core) {
     if (Fc.n < m_min_core_n)
       continue;
-    if (std::abs(Fc.en) > wmax_core)
-      wmax_core = std::abs(Fc.en);
+    if (std::abs(Fc.en()) > wmax_core)
+      wmax_core = std::abs(Fc.en());
   }
 
   // Make inputs:
@@ -479,7 +479,7 @@ ComplexGMatrix FeynmanSigma::Green_core(int kappa, ComplexDouble en) const {
     const auto &a = core[ia];
     if (a.k != kappa)
       continue;
-    const auto inv_de = (en - ComplexDouble{a.en}).inverse();
+    const auto inv_de = (en - ComplexDouble{a.en()}).inverse();
     Gcore += inv_de * m_Pa[ia]; // Pa = |a><a|
   }
   return Gcore;
@@ -534,7 +534,7 @@ ComplexGMatrix FeynmanSigma::Green_hf_basis(int kappa, ComplexDouble en,
       if (a.k != kappa)
         continue;
 
-      const auto inv_de = (en - ComplexDouble{a.en}).inverse();
+      const auto inv_de = (en - ComplexDouble{a.en()}).inverse();
       Gc += G_single(a, a, inv_de);
     }
   }
@@ -673,8 +673,8 @@ ComplexGMatrix FeynmanSigma::Polarisation_k(int k, ComplexDouble omega,
       continue;
 
     const auto &pa = m_Pa[ia]; // |a><a|
-    const auto ea_minus_w = ComplexDouble{a.en} - omega;
-    const auto ea_plus_w = ComplexDouble{a.en} + omega;
+    const auto ea_minus_w = ComplexDouble{a.en()} - omega;
+    const auto ea_plus_w = ComplexDouble{a.en()} + omega;
 
     const auto *Fa_hp = m_holeParticle ? &a : nullptr;
 
@@ -1058,7 +1058,7 @@ GMatrix FeynmanSigma::FeynmanEx_1(int kv, double env) const {
         if (Fa.n < m_min_core_n)
           continue;
         const auto &pa = m_Pa[ia];
-        const auto ea = ComplexDouble{Fa.en, 0.0};
+        const auto ea = ComplexDouble{Fa.en(), 0.0};
 
         // hp here too?
         const auto gxBm = Green_ex(kB, ea - omega, m_Green_method);
@@ -1287,7 +1287,7 @@ GMatrix FeynmanSigma::Exchange_Goldstone(const int kappa,
           // Pkv_bcd_2 allows different screening factor for each 'k2' in
           // exch.
           Coulomb::Pkv_bcd_2(&Pkv, a, m, n, k, m_yeh(m, a), Ck, m_6j, m_fk);
-          const auto dele = en + a.en - m.en - n.en;
+          const auto dele = en + a.en() - m.en() - n.en();
           const auto factor = fk / (f_kkjj * dele);
           addto_G(&Ga_x, Qkv, Pkv, factor);
         } // m
@@ -1298,7 +1298,7 @@ GMatrix FeynmanSigma::Exchange_Goldstone(const int kappa,
             continue;
           Coulomb::Qkv_bcd(&Qkv, n, b, a, k, yknb, Ck);
           Coulomb::Pkv_bcd_2(&Pkv, n, b, a, k, m_yeh(n, b), Ck, m_6j, m_fk);
-          const auto dele = en + n.en - b.en - a.en;
+          const auto dele = en + n.en() - b.en() - a.en();
           const auto factor = fk / (f_kkjj * dele); // XXX
           addto_G(&Ga_x, Qkv, Pkv, factor);
         } // b

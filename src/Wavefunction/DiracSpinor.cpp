@@ -195,7 +195,7 @@ DiracSpinor operator*(const std::vector<double> &v, DiracSpinor rhs) {
 DiracSpinor &DiracSpinor::operator=(const DiracSpinor &other) {
   assert(*this == other); // same n and kappa
   if (this != &other) {   // same memory location
-    en = other.en;
+    m_en = other.m_en;
     m_f = other.m_f;
     m_g = other.m_g;
     p0 = other.min_pt();
@@ -316,7 +316,7 @@ DiracSpinor DiracSpinor::exactHlike(int n, int k,
     alpha = PhysConst::alpha;
   DiracSpinor Fa(n, k, rgrid);
   using namespace DiracHydrogen;
-  Fa.en = enk(PrincipalQN(n), DiracQN(k), Zeff(zeff), AlphaFS(alpha));
+  Fa.m_en = enk(PrincipalQN(n), DiracQN(k), Zeff(zeff), AlphaFS(alpha));
   for (std::size_t i = 0; i < rgrid->num_points(); ++i) {
     Fa.m_f[i] = DiracHydrogen::f(RaB(rgrid->r()[i]), PrincipalQN(n), DiracQN(k),
                                  Zeff(zeff), AlphaFS(alpha));

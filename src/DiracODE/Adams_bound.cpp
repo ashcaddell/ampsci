@@ -154,7 +154,7 @@ void boundState(DiracSpinor &psi, const double en0,
   }
 
   // store energy etc.
-  psi.en = t_en;
+  psi.set_en() = t_en;
   psi.eps = t_eps;
   psi.set_max_pt() = (std::size_t)t_pinf;
   psi.its = t_its;
@@ -174,10 +174,10 @@ void regularAtOrigin(DiracSpinor &Fa, const double en,
   [[maybe_unused]] auto sp = IO::Profile::safeProfiler(__func__);
   const auto &gr = Fa.rgrid;
   if (en != 0)
-    Fa.en = en;
+    Fa.set_en() = en;
   const auto pinf =
-      Adams::findPracticalInfinity(Fa.en, v, gr->r(), Param::cALR);
-  Adams::DiracMatrix Hd(*gr, v, Fa.k, Fa.en, alpha, H_mag);
+      Adams::findPracticalInfinity(Fa.en(), v, gr->r(), Param::cALR);
+  Adams::DiracMatrix Hd(*gr, v, Fa.k, Fa.en(), alpha, H_mag);
   Adams::outwardAM(Fa.set_f(), Fa.set_g(), Hd, pinf - 1);
   Fa.set_max_pt() = pinf;
   // for safety: make sure zerod! (I may re-use existing orbitals!)
@@ -191,10 +191,10 @@ void regularAtInfinity(DiracSpinor &Fa, const double en,
   [[maybe_unused]] auto sp = IO::Profile::safeProfiler(__func__);
   const auto &gr = Fa.rgrid;
   if (en < 0)
-    Fa.en = en;
+    Fa.set_en() = en;
   const auto pinf =
-      Adams::findPracticalInfinity(Fa.en, v, gr->r(), Param::cALR);
-  Adams::DiracMatrix Hd(*gr, v, Fa.k, Fa.en, alpha, H_mag);
+      Adams::findPracticalInfinity(Fa.en(), v, gr->r(), Param::cALR);
+  Adams::DiracMatrix Hd(*gr, v, Fa.k, Fa.en(), alpha, H_mag);
   Adams::inwardAM(Fa.set_f(), Fa.set_g(), Hd, 0, pinf - 1);
   Fa.set_max_pt() = pinf;
   // for safety: make sure zerod! (I may re-use existing orbitals!)

@@ -302,7 +302,7 @@ double CorrelationPotential::SOEnergyShift(const DiracSpinor &v,
               (&v == &w) ? Qkv : Coulomb::Qk_abcd(w, a, m, n, k, yknb, Ck);
           const auto &ybm = m_yeh.get_y_ab(m, a);
           const auto Pkw = Coulomb::Pk_abcd(w, a, m, n, k, ybm, Ck, m_6j);
-          const auto dele = v.en + a.en - m.en - n.en;
+          const auto dele = v.en() + a.en() - m.en() - n.en();
           del_a += ((1.0 / dele / f_kkjj) * (Qkw + Pkw)) * Qkv;
         } // m
 
@@ -317,7 +317,7 @@ double CorrelationPotential::SOEnergyShift(const DiracSpinor &v,
               (&v == &w) ? Qkv : Coulomb::Qk_abcd(w, n, b, a, k, yknb, Ck);
           const auto &yna = m_yeh.get_y_ab(n, b);
           const auto Pkw = Coulomb::Pk_abcd(w, n, b, a, k, yna, Ck, m_6j);
-          const auto dele = v.en + n.en - b.en - a.en;
+          const auto dele = v.en() + n.en() - b.en() - a.en();
           del_a += ((1.0 / dele / f_kkjj) * (Qkw + Pkw)) * Qkv;
         } // b
 

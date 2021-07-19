@@ -159,7 +159,7 @@ int calculateK_nk(const Wavefunction &wf, std::size_t is, int max_L, double dE,
   int qsteps = (int)jLqr_f[0].size();
 
   // Calculate continuum wavefunctions
-  double ec = dE + wf.core[is].en;
+  double ec = dE + wf.core[is].en();
   cntm.clear();
   int lc_max = l + max_L;
   int lc_min = l - max_L;
@@ -213,7 +213,7 @@ int calculateKpw_nk(const Wavefunction &wf, std::size_t nk, double dE,
 
   auto qsteps = jl_qr.size();
 
-  double eps = dE - psi.en;
+  double eps = dE - psi.en();
   auto maxir = psi.max_pt(); // don't bother going further
 
   if (eps <= 0)

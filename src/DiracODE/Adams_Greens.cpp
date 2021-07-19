@@ -51,7 +51,7 @@ void solve_inhomog(DiracSpinor &Fa, DiracSpinor &Fzero, DiracSpinor &Finf,
   [[maybe_unused]] auto sp = IO::Profile::safeProfiler(__func__, "b");
   regularAtOrigin(Fzero, en, v, H_mag, alpha);
   regularAtInfinity(Finf, en, v, H_mag, alpha);
-  Fa.en = en;
+  Fa.set_en() = en;
   Adams::GreenSolution(Fa, Finf, Fzero, alpha, source);
 }
 

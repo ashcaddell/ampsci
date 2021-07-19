@@ -51,12 +51,9 @@ public:
   const int n;
   //! Dirac quantum number, kappa
   const int k;
-  //! Single-particle energy, not including rest energy
-  double en = 0.0;
-  //! Upper (large) radial component
-  std::vector<double> m_f;
-  //! Lower (small) radial component
-  std::vector<double> m_g;
+
+  auto en() const { return m_en; }
+  auto &set_en() { return m_en; }
 
   const auto &f() const { return m_f; }
   auto &set_f() { return m_f; }
@@ -70,11 +67,9 @@ public:
 
   auto min_pt() const { return p0; }
   auto &set_min_pt() { return p0; }
-  auto set_min_pt(std::size_t new_p0) { p0 = new_p0; }
 
   auto max_pt() const { return pinf; }
   auto &set_max_pt() { return pinf; }
-  auto set_max_pt(std::size_t new_pinf) { pinf = new_pinf; }
 
   //! Number of iterations until energy convergence (for latest routine only)
   int its = -1;
@@ -84,6 +79,12 @@ public:
   double occ_frac = 0.0;
 
 private:
+  //! Single-particle energy, not including rest energy
+  double m_en = 0.0;
+  //! Upper (large) radial component
+  std::vector<double> m_f;
+  //! Lower (small) radial component
+  std::vector<double> m_g;
   //! `practical zero': p0 is first non-zero point for f(r) [usually p0=0]
   std::size_t p0 = 0;
   //! `practical infinity': pinf is last non-zero point for f(r)
@@ -169,7 +170,7 @@ public:
     return lhs.m_k_index < rhs.m_k_index;
   }
   static bool comp_en(const DiracSpinor &lhs, const DiracSpinor &rhs) {
-    return lhs.en < rhs.en;
+    return lhs.en() < rhs.en();
   }
 
   //! Returns worst |<a|b>| (or |<a|b>-1| for a=b) {val, state_names}
