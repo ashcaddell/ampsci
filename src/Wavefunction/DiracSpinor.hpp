@@ -54,9 +54,19 @@ public:
   //! Single-particle energy, not including rest energy
   double en = 0.0;
   //! Upper (large) radial component
-  std::vector<double> f;
+  std::vector<double> m_f;
   //! Lower (small) radial component
-  std::vector<double> g;
+  std::vector<double> m_g;
+
+  const auto &f() const { return m_f; }
+  auto &set_f() { return m_f; }
+  const auto &f(std::size_t i) const { return m_f.at(i); }
+  auto &set_f(std::size_t i) { return m_f.at(i); }
+
+  const auto &g() const { return m_g; }
+  auto &set_g() { return m_g; }
+  const auto &g(std::size_t i) const { return m_g.at(i); }
+  auto &set_g(std::size_t i) { return m_g.at(i); }
 
   auto min_pt() const { return p0; }
   auto &set_min_pt() { return p0; }

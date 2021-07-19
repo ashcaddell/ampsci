@@ -155,8 +155,8 @@ bool RadPot(std::ostream &obuff) {
   // "Regresseion" tests: Self-energy (parts):
   {
     std::cout << "\nSelf-energy components for Cs (Core-Hartree)\n";
-    std::cout
-        << "c.f. Ginges, Berengut, Phys. Rev. A 93, 052509 (2016), TabII\n";
+    std::cout << "c.set_f(). Ginges, Berengut, Phys. Rev. A 93, 052509 (2016), "
+                 "TabII\n";
     // Construct wavefunction, solve HF core+valence (without QED):
     Wavefunction wf({2000, 1.0e-6, 120.0, 0.3 * 120.0, "loglinear", -1.0},
                     {"Cs", 133, "Fermi", -1, 2.3}, 1.0);

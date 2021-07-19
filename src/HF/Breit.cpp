@@ -223,8 +223,8 @@ void Breit::MOPk_ij_Fc(DiracSpinor *BFc, const double Cang,
     for (auto i = Fc.min_pt(); i < Fc.max_pt(); ++i) {
       const auto ff =
           Cc * (m1 + o1) * (b0p[i] + bip[i] + ep * g0p[i] + ep * gip[i]);
-      BFc->f[i] += ff * (1.0 - ep) * Fc.g[i];
-      BFc->g[i] += -ff * (1.0 + ep) * Fc.f[i];
+      BFc->set_f(i) += ff * (1.0 - ep) * Fc.g(i);
+      BFc->set_g(i) += -ff * (1.0 + ep) * Fc.f(i);
     }
   }
 
@@ -233,8 +233,8 @@ void Breit::MOPk_ij_Fc(DiracSpinor *BFc, const double Cang,
     for (auto i = Fc.min_pt(); i < Fc.max_pt(); ++i) {
       const auto ff =
           Cc * (m2 + o2) * (-b0m[i] - bim[i] + e * g0m[i] + e * gim[i]);
-      BFc->f[i] += -ff * (1.0 + e) * Fc.g[i];
-      BFc->g[i] += ff * (1.0 - e) * Fc.f[i];
+      BFc->set_f(i) += -ff * (1.0 + e) * Fc.g(i);
+      BFc->set_g(i) += ff * (1.0 - e) * Fc.f(i);
     }
   }
 
@@ -242,13 +242,13 @@ void Breit::MOPk_ij_Fc(DiracSpinor *BFc, const double Cang,
   if (p1 != 0.0) {
     for (auto i = Fc.min_pt(); i < Fc.max_pt(); ++i) {
       const auto ff = Cc * p1 * (-b0m[i] + e * g0m[i] + b0p[i] - e * g0p[i]);
-      BFc->f[i] += ff * (1.0 - ep) * Fc.g[i];
-      BFc->g[i] += -ff * (1.0 + ep) * Fc.f[i];
+      BFc->set_f(i) += ff * (1.0 - ep) * Fc.g(i);
+      BFc->set_g(i) += -ff * (1.0 + ep) * Fc.f(i);
     }
     for (auto i = Fc.min_pt(); i < Fc.max_pt(); ++i) {
       const auto ff = Cc * p1 * (bim[i] + ep * gim[i] - bip[i] - ep * gip[i]);
-      BFc->f[i] += -ff * (1.0 + e) * Fc.g[i];
-      BFc->g[i] += ff * (1.0 - e) * Fc.f[i];
+      BFc->set_f(i) += -ff * (1.0 + e) * Fc.g(i);
+      BFc->set_g(i) += ff * (1.0 - e) * Fc.f(i);
     }
   }
 }
@@ -268,8 +268,8 @@ void Breit::Nk_ij_Fc(DiracSpinor *BFc, const double Cang,
   const auto &g0 = Bkij.gk_0[sk];
   const auto &gi = Bkij.gk_inf[sk];
   for (auto i = Fc.min_pt(); i < Fc.max_pt(); ++i) {
-    BFc->f[i] += Cg * (g0[i] + gi[i]) * Fc.g[i];
-    BFc->g[i] += Cg * (g0[i] + gi[i]) * Fc.f[i];
+    BFc->set_f(i) += Cg * (g0[i] + gi[i]) * Fc.g(i);
+    BFc->set_g(i) += Cg * (g0[i] + gi[i]) * Fc.f(i);
   }
 }
 

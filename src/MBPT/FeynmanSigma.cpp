@@ -441,7 +441,7 @@ ComplexGMatrix FeynmanSigma::G_single(const DiracSpinor &ket,
     for (auto j = 0ul; j < m_subgrid_points; ++j) {
       const auto sj = ri_subToFull(j);
       Gmat.ff[i][j] =
-          ComplexDouble(x * ket.f[si] * bra.f[sj], iy * ket.f[si] * bra.f[sj])
+          ComplexDouble(x * ket.f(si) * bra.f(sj), iy * ket.f(si) * bra.f(sj))
               .val;
     } // j
   }   // i
@@ -452,13 +452,13 @@ ComplexGMatrix FeynmanSigma::G_single(const DiracSpinor &ket,
       for (auto j = 0ul; j < m_subgrid_points; ++j) {
         const auto sj = ri_subToFull(j);
         Gmat.fg[i][j] =
-            ComplexDouble(x * ket.f[si] * bra.g[sj], iy * ket.f[si] * bra.g[sj])
+            ComplexDouble(x * ket.f(si) * bra.g(sj), iy * ket.f(si) * bra.g(sj))
                 .val;
         Gmat.gf[i][j] =
-            ComplexDouble(x * ket.g[si] * bra.f[sj], iy * ket.g[si] * bra.f[sj])
+            ComplexDouble(x * ket.g(si) * bra.f(sj), iy * ket.g(si) * bra.f(sj))
                 .val;
         Gmat.gg[i][j] =
-            ComplexDouble(x * ket.g[si] * bra.g[sj], iy * ket.g[si] * bra.g[sj])
+            ComplexDouble(x * ket.g(si) * bra.g(sj), iy * ket.g(si) * bra.g(sj))
                 .val;
       } // j
     }   // i
@@ -574,7 +574,7 @@ works better for k=0 (and k>=5 ?)
   // Evaluate Wronskian at ~65% of the way to pinf. Should be inependent of r
   const auto pp = std::size_t(0.65 * double(xI.max_pt()));
   // Not sure why -ve sign here... ??? But needed to agree w/ basis version;
-  const auto w = -1.0 * (xI.f[pp] * x0.g[pp] - x0.f[pp] * xI.g[pp]) / alpha;
+  const auto w = -1.0 * (xI.f(pp) * x0.g(pp) - x0.f(pp) * xI.g(pp)) / alpha;
 
   // Get G0 (Green's function, without exchange):
   const auto g0 = MakeGreensG0(x0, xI, w);
@@ -632,7 +632,7 @@ GMatrix FeynmanSigma::MakeGreensG0(const DiracSpinor &x0, const DiracSpinor &xI,
     const auto si = ri_subToFull(i);
     for (auto j = 0ul; j <= i; ++j) { // j <= i
       const auto sj = ri_subToFull(j);
-      g0I.ff[i][j] = x0.f[sj] * xI.f[si] * winv;
+      g0I.ff[i][j] = x0.f(sj) * xI.f(si) * winv;
       // g0I is symmetric
       g0I.ff[j][i] = g0I.ff[i][j];
     } // j
@@ -645,10 +645,10 @@ GMatrix FeynmanSigma::MakeGreensG0(const DiracSpinor &x0, const DiracSpinor &xI,
         const auto sj = ri_subToFull(j);
         const auto irmin = std::min(sj, si);
         const auto irmax = std::max(sj, si);
-        g0I.fg[i][j] = x0.f[irmin] * xI.g[irmax] * winv;
+        g0I.fg[i][j] = x0.f(irmin) * xI.g(irmax) * winv;
         // fg = gf?
-        g0I.gf[i][j] = x0.g[irmin] * xI.f[irmax] * winv;
-        g0I.gg[i][j] = x0.g[irmin] * xI.g[irmax] * winv;
+        g0I.gf[i][j] = x0.g(irmin) * xI.f(irmax) * winv;
+        g0I.gg[i][j] = x0.g(irmin) * xI.g(irmax) * winv;
       } // j
     }   // i
   }

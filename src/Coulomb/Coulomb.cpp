@@ -68,7 +68,7 @@ static inline void yk_ijk_impl(const int l, const DiracSpinor &Fa,
   };
 
   const auto ff = [&](std::size_t i) {
-    return (Fa.f[i] * Fb.f[i] + Fa.g[i] * Fb.g[i]) * w(i) * gr->drduor()[i];
+    return (Fa.f(i) * Fb.f(i) + Fa.g(i) * Fb.g(i)) * w(i) * gr->drduor()[i];
   };
   const auto &r = gr->r();
 
@@ -171,9 +171,9 @@ static inline void Breit_abk_impl(const int l, const DiracSpinor &Fa,
 
   auto fgfg = [&](std::size_t i) {
     if constexpr (pm == -1)
-      return (Fa.f[i] * Fb.g[i] - Fa.g[i] * Fb.f[i]);
+      return (Fa.f(i) * Fb.g(i) - Fa.g(i) * Fb.f(i));
     else
-      return (Fa.f[i] * Fb.g[i] + Fa.g[i] * Fb.f[i]);
+      return (Fa.f(i) * Fb.g(i) + Fa.g(i) * Fb.f(i));
   };
 
   const auto bmax = std::min(Fa.max_pt(), Fb.max_pt());
@@ -275,8 +275,8 @@ double Rk_abcd(const DiracSpinor &Fa, const DiracSpinor &Fc,
   const auto &drdu = Fa.rgrid->drdu();
   const auto i0 = std::max(Fa.min_pt(), Fc.min_pt());
   const auto imax = std::min(Fa.max_pt(), Fc.max_pt());
-  const auto Rff = NumCalc::integrate(1.0, i0, imax, Fa.f, Fc.f, yk_bd, drdu);
-  const auto Rgg = NumCalc::integrate(1.0, i0, imax, Fa.g, Fc.g, yk_bd, drdu);
+  const auto Rff = NumCalc::integrate(1.0, i0, imax, Fa.f(), Fc.f(), yk_bd, drdu);
+  const auto Rgg = NumCalc::integrate(1.0, i0, imax, Fa.g(), Fc.g(), yk_bd, drdu);
   return (Rff + Rgg) * Fa.rgrid->du();
 }
 
@@ -293,8 +293,8 @@ DiracSpinor Rkv_bcd(const int kappa_a, const DiracSpinor &Fc,
   auto out = DiracSpinor(0, kappa_a, Fc.rgrid);
   out.set_min_pt() = Fc.min_pt();
   out.set_max_pt() = Fc.max_pt();
-  out.f = qip::multiply(Fc.f, ykbd);
-  out.g = qip::multiply(Fc.g, ykbd);
+  out.set_f() = qip::multiply(Fc.f(), ykbd);
+  out.set_g() = qip::multiply(Fc.g(), ykbd);
   return out;
 }
 //------------------------------------------------------------------------------
@@ -304,16 +304,16 @@ void Rkv_bcd(DiracSpinor *const Rkv, const DiracSpinor &Fc,
   Rkv->set_min_pt() = Fc.min_pt();
   Rkv->set_max_pt() = Fc.max_pt();
   for (auto i = 0ul; i < Rkv->min_pt(); ++i) {
-    Rkv->f[i] = 0.0;
-    Rkv->g[i] = 0.0;
+    Rkv->set_f(i) = 0.0;
+    Rkv->set_g(i) = 0.0;
   }
   for (auto i = Rkv->min_pt(); i < Rkv->max_pt(); ++i) {
-    Rkv->f[i] = Fc.f[i] * ykbd[i];
-    Rkv->g[i] = Fc.g[i] * ykbd[i];
+    Rkv->set_f(i) = Fc.f(i) * ykbd[i];
+    Rkv->set_g(i) = Fc.g(i) * ykbd[i];
   }
   for (auto i = Rkv->max_pt(); i < Rkv->rgrid->num_points(); ++i) {
-    Rkv->f[i] = 0.0;
-    Rkv->g[i] = 0.0;
+    Rkv->set_f(i) = 0.0;
+    Rkv->set_g(i) = 0.0;
   }
 }
 

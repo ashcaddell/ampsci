@@ -383,11 +383,11 @@ void TDHF::print(const std::string &ofname) const {
     of << gr.r(i) << " ";
     for (auto ic = 0ul; ic < m_core.size(); ic++) {
       const auto &Fc = m_core[ic];
-      of << Fc.f[i] << " ";
+      of << Fc.f(i) << " ";
       for (auto j = 0ul; j < m_X[ic].size(); j++) {
         const auto &Xx = m_X[ic][j];
         const auto &Yx = m_Y[ic][j];
-        of << Xx.f[i] << " " << Yx.f[i] << " ";
+        of << Xx.f(i) << " " << Yx.f(i) << " ";
       }
     }
     of << "\n";

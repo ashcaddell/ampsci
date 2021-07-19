@@ -18,8 +18,8 @@ DiracSpinor::DiracSpinor(int in_n, int in_k,
     : rgrid(in_rgrid),
       n(in_n),
       k(in_k),
-      f(std::vector<double>(rgrid->num_points(), 0.0)),
-      g(f),
+      m_f(std::vector<double>(rgrid->num_points(), 0.0)),
+      m_g(m_f),
       pinf(rgrid->num_points()),
       m_twoj(AtomData::twoj_k(in_k)),
       m_l(AtomData::l_k(in_k)),
@@ -49,9 +49,9 @@ double DiracSpinor::norm() const { return std::sqrt((*this) * (*this)); }
 //******************************************************************************
 const DiracSpinor &DiracSpinor::scale(const double factor) {
   for (std::size_t i = p0; i < pinf; ++i)
-    f[i] *= factor;
+    m_f[i] *= factor;
   for (std::size_t i = p0; i < pinf; ++i)
-    g[i] *= factor;
+    m_g[i] *= factor;
   // // XXX Need this for some reason!??
   // Means something beyond pinf is hapenning!?!? XXX XXX
   // zero_boundaries(); // shouln't be needed!
@@ -61,12 +61,12 @@ const DiracSpinor &DiracSpinor::scale(const double factor) {
 const DiracSpinor &DiracSpinor::scale(const std::vector<double> &v) {
   const auto max = std::min(pinf, v.size());
   for (std::size_t i = p0; i < max; ++i) {
-    f[i] *= v[i];
-    g[i] *= v[i];
+    m_f[i] *= v[i];
+    m_g[i] *= v[i];
   }
   for (std::size_t i = max; i < pinf; ++i) {
-    f[i] = 0;
-    g[i] = 0;
+    m_f[i] = 0;
+    m_g[i] = 0;
   }
   return *this;
 }
@@ -77,12 +77,12 @@ void DiracSpinor::normalise(double norm_to) { scale(norm_to / norm()); }
 //------------------------------------------------------------------------------
 void DiracSpinor::zero_boundaries() {
   for (std::size_t i = 0; i < p0; ++i) {
-    f[i] = 0.0;
-    g[i] = 0.0;
+    m_f[i] = 0.0;
+    m_g[i] = 0.0;
   }
-  for (std::size_t i = pinf; i < f.size(); ++i) {
-    f[i] = 0.0;
-    g[i] = 0.0;
+  for (std::size_t i = pinf; i < m_f.size(); ++i) {
+    m_f[i] = 0.0;
+    m_g[i] = 0.0;
   }
 }
 
@@ -92,9 +92,9 @@ std::pair<double, double> DiracSpinor::r0pinfratio() const {
     return std::fabs(a) < std::fabs(b);
   };
   const auto max_pos =
-      std::max_element(f.begin(), f.begin() + long(pinf), max_abs_compare);
-  const auto r0_ratio = f[p0] / *max_pos;
-  const auto pinf_ratio = f[pinf - 1] / *max_pos;
+      std::max_element(m_f.begin(), m_f.begin() + long(pinf), max_abs_compare);
+  const auto r0_ratio = m_f[p0] / *max_pos;
+  const auto pinf_ratio = m_f[pinf - 1] / *max_pos;
   return std::make_pair(r0_ratio, pinf_ratio);
   // nb: do i care about ratio to max? or just value?
 }
@@ -105,7 +105,7 @@ std::vector<double> DiracSpinor::rho() const {
   psi2.reserve(rgrid->num_points());
   const auto factor = twojp1() * occ_frac;
   for (auto i = 0ul; i < rgrid->num_points(); ++i) {
-    psi2.emplace_back(factor * (f[i] * f[i] + g[i] * g[i]));
+    psi2.emplace_back(factor * (m_f[i] * m_f[i] + m_g[i] * m_g[i]));
   }
   return psi2;
 }
@@ -126,8 +126,8 @@ double operator*(const DiracSpinor &lhs, const DiracSpinor &rhs) {
   const auto imin = std::max(lhs.min_pt(), rhs.min_pt());
   const auto imax = std::min(lhs.max_pt(), rhs.max_pt());
   const auto &dr = lhs.rgrid->drdu();
-  return (NumCalc::integrate(1, imin, imax, lhs.f, rhs.f, dr) +
-          NumCalc::integrate(1, imin, imax, lhs.g, rhs.g, dr)) *
+  return (NumCalc::integrate(1, imin, imax, lhs.m_f, rhs.m_f, dr) +
+          NumCalc::integrate(1, imin, imax, lhs.m_g, rhs.m_g, dr)) *
          lhs.rgrid->du();
 }
 
@@ -140,9 +140,9 @@ DiracSpinor &DiracSpinor::operator+=(const DiracSpinor &rhs) {
     p0 = rhs.min_pt();
 
   for (std::size_t i = rhs.min_pt(); i < rhs.max_pt(); i++)
-    f[i] += rhs.f[i];
+    m_f[i] += rhs.m_f[i];
   for (std::size_t i = rhs.min_pt(); i < rhs.max_pt(); i++)
-    g[i] += rhs.g[i];
+    m_g[i] += rhs.m_g[i];
   return *this;
 }
 DiracSpinor &DiracSpinor::operator-=(const DiracSpinor &rhs) {
@@ -154,9 +154,9 @@ DiracSpinor &DiracSpinor::operator-=(const DiracSpinor &rhs) {
     p0 = rhs.min_pt();
 
   for (std::size_t i = rhs.min_pt(); i < rhs.max_pt(); i++)
-    f[i] -= rhs.f[i];
+    m_f[i] -= rhs.m_f[i];
   for (std::size_t i = rhs.min_pt(); i < rhs.max_pt(); i++)
-    g[i] -= rhs.g[i];
+    m_g[i] -= rhs.m_g[i];
 
   return *this;
 }
@@ -196,8 +196,8 @@ DiracSpinor &DiracSpinor::operator=(const DiracSpinor &other) {
   assert(*this == other); // same n and kappa
   if (this != &other) {   // same memory location
     en = other.en;
-    f = other.f;
-    g = other.g;
+    m_f = other.m_f;
+    m_g = other.m_g;
     p0 = other.min_pt();
     pinf = other.max_pt();
     occ_frac = other.occ_frac;
@@ -318,10 +318,10 @@ DiracSpinor DiracSpinor::exactHlike(int n, int k,
   using namespace DiracHydrogen;
   Fa.en = enk(PrincipalQN(n), DiracQN(k), Zeff(zeff), AlphaFS(alpha));
   for (std::size_t i = 0; i < rgrid->num_points(); ++i) {
-    Fa.f[i] = DiracHydrogen::f(RaB(rgrid->r()[i]), PrincipalQN(n), DiracQN(k),
-                               Zeff(zeff), AlphaFS(alpha));
-    Fa.g[i] = DiracHydrogen::g(RaB(rgrid->r()[i]), PrincipalQN(n), DiracQN(k),
-                               Zeff(zeff), AlphaFS(alpha));
+    Fa.m_f[i] = DiracHydrogen::f(RaB(rgrid->r()[i]), PrincipalQN(n), DiracQN(k),
+                                 Zeff(zeff), AlphaFS(alpha));
+    Fa.m_g[i] = DiracHydrogen::g(RaB(rgrid->r()[i]), PrincipalQN(n), DiracQN(k),
+                                 Zeff(zeff), AlphaFS(alpha));
   }
   return Fa;
 }

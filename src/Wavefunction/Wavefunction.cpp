@@ -690,7 +690,7 @@ std::vector<double> Wavefunction::coreDensity() const {
   for (const auto &phi : core) {
     auto f = double(phi.twoj() + 1) * phi.occ_frac;
     for (auto i = 0ul; i < rgrid->num_points(); i++) {
-      rho[i] += f * (phi.f[i] * phi.f[i] + phi.g[i] * phi.g[i]);
+      rho[i] += f * (phi.f(i) * phi.f(i) + phi.g(i) * phi.g(i));
     }
   }
   return rho;

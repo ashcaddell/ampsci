@@ -147,7 +147,7 @@ int ContinuumOrbitals::solveLocalContinuum(double ec, int min_l, int max_l)
   // for (std::size_t i = 0; i < gr.num_points(); i++) {
   //   of << gr.r(i) << " ";
   //   for (auto &psi : orbitals) {
-  //     of << psi.f[i] << " ";
+  //     of << psi.f(i) << " ";
   //   }
   //   of << "\n";
   // }

@@ -291,7 +291,7 @@ inline std::vector<double> UnitTest::helper::yk_naive(const DiracSpinor &Fa,
     f.reserve(gr.r().size());
     for (auto j = 0ul; j < yk.size(); ++j) {
       f.push_back(rtkr(r, gr.r(j), k) *
-                  (Fa.f[j] * Fb.f[j] + Fa.g[j] * Fb.g[j]));
+                  (Fa.f(j) * Fb.f(j) + Fa.g(j) * Fb.g(j)));
     }
 
     const auto p0 = std::max(Fa.min_pt(), Fb.min_pt());

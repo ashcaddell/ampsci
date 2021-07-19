@@ -186,7 +186,7 @@ void HartreeFock::hf_core_approx(const double eps_target_HF) {
       for (std::size_t j = 0; j < Fa.max_pt(); j += de_stride) {
         const double dv =
             (m_vdir[j] - vdir_old[j]) + (appr_vex_core[i][j] - vex_old[i][j]);
-        dEa += dv * Fa.f[j] * Fa.f[j] * rgrid->drdu(j);
+        dEa += dv * Fa.f(j) * Fa.f(j) * rgrid->drdu(j);
       }
       dEa *= rgrid->du() * de_stride;
       const double en_guess = (en_old < -dEa) ? en_old + dEa : en_old;
@@ -274,7 +274,7 @@ void HartreeFock::KohnSham_core(const double eps_target_HF) {
       // calculate de from PT
       double dEa = 0;
       for (std::size_t j = 0; j < Fa.max_pt(); j += de_stride) {
-        dEa += (m_vdir[j] - vdir_old[j]) * Fa.f[j] * Fa.f[j] * rgrid->drdu(j);
+        dEa += (m_vdir[j] - vdir_old[j]) * Fa.f(j) * Fa.f(j) * rgrid->drdu(j);
       }
       dEa *= rgrid->du() * de_stride;
       const double en_guess = (en_old < -dEa) ? en_old + dEa : en_old;
@@ -443,7 +443,7 @@ EpsIts HartreeFock::hf_valence_approx(DiracSpinor &Fa, double eps_target_HF)
     double en_new_guess = 0;
     for (std::size_t i = 0; i < Fa.max_pt(); i += de_stride) {
       en_new_guess +=
-          (vexa[i] - vexa_old[i]) * Fa.f[i] * Fa.f[i] * rgrid->drdu(i);
+          (vexa[i] - vexa_old[i]) * Fa.f(i) * Fa.f(i) * rgrid->drdu(i);
     }
     en_new_guess = en_old + en_new_guess * rgrid->du() * de_stride;
     // Solve Dirac using new potential:
@@ -611,7 +611,7 @@ void HartreeFock::form_approx_vex_core_a(const DiracSpinor &Fa,
     return (std::abs(a) < std::abs(b));
   };
   const auto max =
-      std::abs(*std::max_element(Fa.f.begin(), Fa.f.end(), max_abs));
+      std::abs(*std::max_element(Fa.f().begin(), Fa.f().end(), max_abs));
   const auto cut_off = 0.003 * max;
 
   if (!m_excludeExchange) {
@@ -630,10 +630,10 @@ void HartreeFock::form_approx_vex_core_a(const DiracSpinor &Fa,
       std::vector<double> v_Fab(rgrid->num_points());
       for (std::size_t i = 0; i < irmax; i++) {
         // This is the approximte part! Divides by Fa
-        if (std::abs(Fa.f[i]) < cut_off)
+        if (std::abs(Fa.f(i)) < cut_off)
           continue;
-        const auto fac_top = Fa.f[i] * Fb.f[i] + Fa.g[i] * Fb.g[i];
-        const auto fac_bot = Fa.f[i] * Fa.f[i] + Fa.g[i] * Fa.g[i];
+        const auto fac_top = Fa.f(i) * Fb.f(i) + Fa.g(i) * Fb.g(i);
+        const auto fac_bot = Fa.f(i) * Fa.f(i) + Fa.g(i) * Fa.g(i);
         v_Fab[i] = -x_tjbp1 * fac_top / fac_bot;
       } // r
       for (int k = kmin; k <= kmax; k++) {
@@ -686,7 +686,7 @@ std::vector<double> vex_approx(const DiracSpinor &Fa,
     return (std::abs(a) < std::abs(b));
   };
   const auto max =
-      std::abs(*std::max_element(Fa.f.begin(), Fa.f.end(), max_abs));
+      std::abs(*std::max_element(Fa.f().begin(), Fa.f().end(), max_abs));
   const auto cut_off = lambda_cut * max;
 
   for (const auto &Fb : core) {
@@ -703,10 +703,10 @@ std::vector<double> vex_approx(const DiracSpinor &Fa,
     std::vector<double> v_Fab(Fa.rgrid->num_points());
     for (std::size_t i = 0; i < irmax; i++) {
       // This is the approximate part! Divides by Fa
-      if (std::abs(Fa.f[i]) < cut_off)
+      if (std::abs(Fa.f(i)) < cut_off)
         continue;
-      const auto fac_top = Fa.f[i] * Fb.f[i] + Fa.g[i] * Fb.g[i];
-      const auto fac_bot = Fa.f[i] * Fa.f[i] + Fa.g[i] * Fa.g[i];
+      const auto fac_top = Fa.f(i) * Fb.f(i) + Fa.g(i) * Fb.g(i);
+      const auto fac_bot = Fa.f(i) * Fa.f(i) + Fa.g(i) * Fa.g(i);
       v_Fab[i] = -x_tjbp1 * fac_top / fac_bot;
     } // r
 
@@ -748,7 +748,7 @@ void HartreeFock::vex_psia_core(const DiracSpinor &Fa, DiracSpinor &VxFa) const
 // ..... i.e., must be core orbital
 {
   [[maybe_unused]] auto sp = IO::Profile::safeProfiler(__func__);
-  VxFa.set_max_pt() = Fa.f.size(); // silly hack. Make sure VxFa = 0 after pinf
+  VxFa.set_max_pt() = Fa.f().size(); // silly hack. Make sure VxFa = 0 after pinf
   VxFa *= 0.0;
   VxFa.set_max_pt() = Fa.max_pt(); // updated below
 
@@ -769,8 +769,8 @@ void HartreeFock::vex_psia_core(const DiracSpinor &Fa, DiracSpinor &VxFa) const
         continue;
       for (auto i = 0u; i < Fb.max_pt(); i++) {
         const auto v = -x_tjbp1 * Labk * vabk[std::size_t(k - kmin)][i];
-        VxFa.f[i] += v * Fb.f[i];
-        VxFa.g[i] += v * Fb.g[i];
+        VxFa.set_f(i) += v * Fb.f(i);
+        VxFa.set_g(i) += v * Fb.g(i);
       } // r
     }   // k
   }     // b
@@ -808,8 +808,8 @@ DiracSpinor vexFa(const DiracSpinor &Fa, const std::vector<DiracSpinor> &core,
       Coulomb::yk_ab(Fb, Fa, k, vabk, Fb.max_pt());
       const auto factor = -x_tjbp1 * tjs * tjs;
       for (auto i = 0u; i < Fb.max_pt(); i++) {
-        VxFa.f[i] += factor * vabk[i] * Fb.f[i];
-        VxFa.g[i] += factor * vabk[i] * Fb.g[i];
+        VxFa.set_f(i) += factor * vabk[i] * Fb.f(i);
+        VxFa.set_g(i) += factor * vabk[i] * Fb.g(i);
       } // r
     }   // k
   }     // b

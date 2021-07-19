@@ -37,12 +37,12 @@ namespace Helper {
 int countNodes(const DiracSpinor &Fn)
 // Just counts the number of times orbital (f) changes sign
 {
-  double sp = Fn.f[Fn.min_pt() + 3];
+  double sp = Fn.f(Fn.min_pt() + 3);
   int counted_nodes = 0;
   for (auto i = Fn.min_pt() + 4; i < Fn.max_pt() - 3; ++i) {
-    if (sp * Fn.f[i] < 0) {
+    if (sp * Fn.f(i) < 0) {
       ++counted_nodes;
-      sp = Fn.f[i];
+      sp = Fn.f(i);
     }
   }
   return counted_nodes;

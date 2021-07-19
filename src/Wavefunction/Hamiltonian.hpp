@@ -92,51 +92,51 @@ public:
     const auto min = std::max(Fa.min_pt(), Fb.min_pt());
     const auto &drdu = Fa.rgrid->drdu();
 
-    auto dga = NumCalc::derivative(Fa.g, drdu, Fb.rgrid->du(), 1);
-    auto dgb = NumCalc::derivative(Fb.g, drdu, Fb.rgrid->du(), 1);
+    auto dga = NumCalc::derivative(Fa.g(), drdu, Fb.rgrid->du(), 1);
+    auto dgb = NumCalc::derivative(Fb.g(), drdu, Fb.rgrid->du(), 1);
 
     // auto dga = Fa.dg.empty()
-    //                ? NumCalc::derivative(Fa.g, drdu, Fb.rgrid->du(), 1)
+    //                ? NumCalc::derivative(Fa.g(), drdu, Fb.rgrid->du(), 1)
     //                : Fa.dg;
     // auto dgb = Fb.dg.empty()
-    //                ? NumCalc::derivative(Fb.g, drdu, Fb.rgrid->du(), 1)
+    //                ? NumCalc::derivative(Fb.g(), drdu, Fb.rgrid->du(), 1)
     //                : Fb.dg;
 
     for (std::size_t i = 0; i < max; i++) {
       auto r = Fa.rgrid->r()[i];
-      dga[i] -= (kappa * Fa.g[i] / r);
-      dgb[i] -= (kappa * Fb.g[i] / r);
+      dga[i] -= (kappa * Fa.g(i) / r);
+      dgb[i] -= (kappa * Fb.g(i) / r);
     }
 
-    auto D1m2 = NumCalc::integrate(1.0, min, max, Fa.f, dgb, drdu) +
-                NumCalc::integrate(1.0, min, max, Fb.f, dga, drdu);
+    auto D1m2 = NumCalc::integrate(1.0, min, max, Fa.f(), dgb, drdu) +
+                NumCalc::integrate(1.0, min, max, Fb.f(), dga, drdu);
 
     // auto dfa = Fa.df.empty()
-    //                ? NumCalc::derivative(Fa.f, drdu, Fb.rgrid->du(), 1)
+    //                ? NumCalc::derivative(Fa.f(), drdu, Fb.rgrid->du(), 1)
     //                : Fa.df;
     // auto dfb = Fb.df.empty()
-    //                ? NumCalc::derivative(Fb.f, drdu, Fb.rgrid->du(), 1)
+    //                ? NumCalc::derivative(Fb.f(), drdu, Fb.rgrid->du(), 1)
     //                : Fb.df;
     //
     // for (std::size_t i = 0; i < max; i++) {
     //   auto r = Fa.rgrid->r() [i];
-    //   dfa[i] += (kappa * Fa.f[i] / r);
-    //   dfb[i] += (kappa * Fb.f[i] / r);
+    //   dfa[i] += (kappa * Fa.f(i) / r);
+    //   dfb[i] += (kappa * Fb.f(i) / r);
     // }
     //
-    // auto D1m2 = -NumCalc::integrate(1.0, min, max, Fb.g, dfa, drdu) -
-    //             NumCalc::integrate(1.0, min, max, Fa.g, dfb, drdu);
+    // auto D1m2 = -NumCalc::integrate(1.0, min, max, Fb.g(), dfa, drdu) -
+    //             NumCalc::integrate(1.0, min, max, Fa.g(), dfb, drdu);
 
-    auto Sab = NumCalc::integrate(1.0, min, max, Fa.g, Fb.g, drdu);
+    auto Sab = NumCalc::integrate(1.0, min, max, Fa.g(), Fb.g(), drdu);
 
     const auto &v = get_v(kappa);
-    auto Vab = NumCalc::integrate(1.0, min, max, Fa.f, Fb.f, v, drdu) +
-               NumCalc::integrate(1.0, min, max, Fa.g, Fb.g, v, drdu);
+    auto Vab = NumCalc::integrate(1.0, min, max, Fa.f(), Fb.f(), v, drdu) +
+               NumCalc::integrate(1.0, min, max, Fa.g(), Fb.g(), v, drdu);
 
     auto V_mag = 0.0;
     if (!m_v_mag.empty())
-      V_mag = NumCalc::integrate(1.0, min, max, Fa.f, Fb.g, m_v_mag, drdu) +
-              NumCalc::integrate(1.0, min, max, Fa.g, Fb.f, m_v_mag, drdu);
+      V_mag = NumCalc::integrate(1.0, min, max, Fa.f(), Fb.g(), m_v_mag, drdu) +
+              NumCalc::integrate(1.0, min, max, Fa.g(), Fb.f(), m_v_mag, drdu);
     // XXX include MAG!
 
     return (Vab - m_c * (D1m2 + 2.0 * m_c * Sab + V_mag)) * Fa.rgrid->du();
