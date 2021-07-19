@@ -88,8 +88,8 @@ public:
     if (Fa.k != Fb.k)
       return 0.0;
     const auto kappa = Fa.k;
-    const auto max = std::min(Fa.pinf, Fb.pinf);
-    const auto min = std::max(Fa.p0, Fb.p0);
+    const auto max = std::min(Fa.max_pt(), Fb.max_pt());
+    const auto min = std::max(Fa.min_pt(), Fb.min_pt());
     const auto &drdu = Fa.rgrid->drdu();
 
     auto dga = NumCalc::derivative(Fa.g, drdu, Fb.rgrid->du(), 1);

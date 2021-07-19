@@ -182,7 +182,7 @@ int calculateK_nk(const Wavefunction &wf, std::size_t is, int max_L, double dE,
       //#pragma omp parallel for
       for (int iq = 0; iq < qsteps; iq++) {
         double a = 0.;
-        auto maxj = psi.pinf; // don't bother going further
+        auto maxj = psi.max_pt(); // don't bother going further
         double af = NumCalc::integrate(1.0, 0, maxj, psi.f, phic.f,
                                        jLqr_f[L][iq], wf.rgrid->drdu());
         double ag = NumCalc::integrate(1.0, 0, maxj, psi.g, phic.g,
@@ -214,7 +214,7 @@ int calculateKpw_nk(const Wavefunction &wf, std::size_t nk, double dE,
   auto qsteps = jl_qr.size();
 
   double eps = dE - psi.en;
-  auto maxir = psi.pinf; // don't bother going further
+  auto maxir = psi.max_pt(); // don't bother going further
 
   if (eps <= 0)
     return 0;

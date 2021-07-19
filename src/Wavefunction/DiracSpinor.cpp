@@ -123,8 +123,8 @@ double DiracSpinor::rinf() const { return rgrid->r()[pinf - 1]; }
 //******************************************************************************
 double operator*(const DiracSpinor &lhs, const DiracSpinor &rhs) {
   // Note: ONLY radial part ("F" radial spinor)
-  const auto imin = std::max(lhs.p0, rhs.p0);
-  const auto imax = std::min(lhs.pinf, rhs.pinf);
+  const auto imin = std::max(lhs.min_pt(), rhs.min_pt());
+  const auto imax = std::min(lhs.max_pt(), rhs.max_pt());
   const auto &dr = lhs.rgrid->drdu();
   return (NumCalc::integrate(1, imin, imax, lhs.f, rhs.f, dr) +
           NumCalc::integrate(1, imin, imax, lhs.g, rhs.g, dr)) *
@@ -134,28 +134,28 @@ double operator*(const DiracSpinor &lhs, const DiracSpinor &rhs) {
 DiracSpinor &DiracSpinor::operator+=(const DiracSpinor &rhs) {
   assert(this->k == rhs.k);
 
-  if (rhs.pinf > pinf)
-    pinf = rhs.pinf;
-  if (rhs.p0 < p0)
-    p0 = rhs.p0;
+  if (rhs.max_pt() > pinf)
+    pinf = rhs.max_pt();
+  if (rhs.min_pt() < p0)
+    p0 = rhs.min_pt();
 
-  for (std::size_t i = rhs.p0; i < rhs.pinf; i++)
+  for (std::size_t i = rhs.min_pt(); i < rhs.max_pt(); i++)
     f[i] += rhs.f[i];
-  for (std::size_t i = rhs.p0; i < rhs.pinf; i++)
+  for (std::size_t i = rhs.min_pt(); i < rhs.max_pt(); i++)
     g[i] += rhs.g[i];
   return *this;
 }
 DiracSpinor &DiracSpinor::operator-=(const DiracSpinor &rhs) {
   assert(this->k == rhs.k);
 
-  if (rhs.pinf > pinf)
-    pinf = rhs.pinf;
-  if (rhs.p0 < p0)
-    p0 = rhs.p0;
+  if (rhs.max_pt() > pinf)
+    pinf = rhs.max_pt();
+  if (rhs.min_pt() < p0)
+    p0 = rhs.min_pt();
 
-  for (std::size_t i = rhs.p0; i < rhs.pinf; i++)
+  for (std::size_t i = rhs.min_pt(); i < rhs.max_pt(); i++)
     f[i] -= rhs.f[i];
-  for (std::size_t i = rhs.p0; i < rhs.pinf; i++)
+  for (std::size_t i = rhs.min_pt(); i < rhs.max_pt(); i++)
     g[i] -= rhs.g[i];
 
   return *this;
@@ -198,8 +198,8 @@ DiracSpinor &DiracSpinor::operator=(const DiracSpinor &other) {
     en = other.en;
     f = other.f;
     g = other.g;
-    p0 = other.p0;
-    pinf = other.pinf;
+    p0 = other.min_pt();
+    pinf = other.max_pt();
     occ_frac = other.occ_frac;
   }
   return *this;

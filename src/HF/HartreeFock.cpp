@@ -183,7 +183,7 @@ void HartreeFock::hf_core_approx(const double eps_target_HF) {
       const double en_old = Fa.en;
       // calculate de from PT
       double dEa = 0;
-      for (std::size_t j = 0; j < Fa.pinf; j += de_stride) {
+      for (std::size_t j = 0; j < Fa.max_pt(); j += de_stride) {
         const double dv =
             (m_vdir[j] - vdir_old[j]) + (appr_vex_core[i][j] - vex_old[i][j]);
         dEa += dv * Fa.f[j] * Fa.f[j] * rgrid->drdu(j);
@@ -201,7 +201,7 @@ void HartreeFock::hf_core_approx(const double eps_target_HF) {
         std::cout << __LINE__ << "| ";
         printf(" --- %2i,%2i: en=%11.5f  HFeps = %.0e;  Adams = %.0e[%2i]  "
                "(%4i)\n",
-               Fa.n, Fa.k, Fa.en, state_eps, Fa.eps, Fa.its, (int)Fa.pinf);
+               Fa.n, Fa.k, Fa.en, state_eps, Fa.eps, Fa.its, (int)Fa.max_pt());
       }
     } // core states
     if constexpr (print_each_eps) {
@@ -273,7 +273,7 @@ void HartreeFock::KohnSham_core(const double eps_target_HF) {
       const double en_old = Fa.en;
       // calculate de from PT
       double dEa = 0;
-      for (std::size_t j = 0; j < Fa.pinf; j += de_stride) {
+      for (std::size_t j = 0; j < Fa.max_pt(); j += de_stride) {
         dEa += (m_vdir[j] - vdir_old[j]) * Fa.f[j] * Fa.f[j] * rgrid->drdu(j);
       }
       dEa *= rgrid->du() * de_stride;
@@ -441,7 +441,7 @@ EpsIts HartreeFock::hf_valence_approx(DiracSpinor &Fa, double eps_target_HF)
     }
     // Use P.T. to calculate energy change:
     double en_new_guess = 0;
-    for (std::size_t i = 0; i < Fa.pinf; i += de_stride) {
+    for (std::size_t i = 0; i < Fa.max_pt(); i += de_stride) {
       en_new_guess +=
           (vexa[i] - vexa_old[i]) * Fa.f[i] * Fa.f[i] * rgrid->drdu(i);
     }
@@ -621,7 +621,7 @@ void HartreeFock::form_approx_vex_core_a(const DiracSpinor &Fa,
         continue;
       const auto tjb = Fb.twoj();
       const double x_tjbp1 = (tjb + 1) * Fb.occ_frac;
-      const auto irmax = std::min(Fa.pinf, Fb.pinf);
+      const auto irmax = std::min(Fa.max_pt(), Fb.max_pt());
       const int kmin = std::abs(twoj_a - tjb) / 2;
       const int kmax = (twoj_a + tjb) / 2;
       const auto &vabk = m_Yab.get_y_ab(Fb, Fa);
@@ -654,7 +654,7 @@ void HartreeFock::form_approx_vex_core_a(const DiracSpinor &Fa,
     const double x_tjap1 = (twoj_a + 1); // no occ_frac here ?
     const int kmax = twoj_a;
     const auto &vaak = m_Yab.get_y_ab(Fa, Fa);
-    const auto irmax = Fa.pinf; // rgrid->num_points();
+    const auto irmax = Fa.max_pt(); // rgrid->num_points();
     for (int k = 0; k <= kmax; k++) {
       const auto Labk = m_Yab.Ck().get_Lambdakab(k, Fa.k, Fa.k);
       if (Labk == 0)
@@ -693,7 +693,7 @@ std::vector<double> vex_approx(const DiracSpinor &Fa,
     const auto tjb = Fb.twoj();
     const auto lb = Fb.l();
     const double x_tjbp1 = (tjb + 1) * Fb.occ_frac; // when in core??
-    const auto irmax = std::min(Fa.pinf, Fb.pinf);
+    const auto irmax = std::min(Fa.max_pt(), Fb.max_pt());
     const int kmin = std::abs(tja - tjb) / 2;
     int kmax = (tja + tjb) / 2;
     if (kmax > k_cut)
@@ -748,16 +748,16 @@ void HartreeFock::vex_psia_core(const DiracSpinor &Fa, DiracSpinor &VxFa) const
 // ..... i.e., must be core orbital
 {
   [[maybe_unused]] auto sp = IO::Profile::safeProfiler(__func__);
-  VxFa.pinf = Fa.f.size(); // silly hack. Make sure VxFa = 0 after pinf
+  VxFa.set_max_pt() = Fa.f.size(); // silly hack. Make sure VxFa = 0 after pinf
   VxFa *= 0.0;
-  VxFa.pinf = Fa.pinf; // updated below
+  VxFa.set_max_pt() = Fa.max_pt(); // updated below
 
   if (m_excludeExchange)
     return;
 
   const auto twoj_a = Fa.twoj();
   for (const auto &Fb : (*p_core)) {
-    VxFa.pinf = std::max(VxFa.pinf, Fb.pinf);
+    VxFa.set_max_pt() = std::max(VxFa.max_pt(), Fb.max_pt());
     const auto tjb = Fb.twoj();
     const double x_tjbp1 = (Fa == Fb) ? (tjb + 1) : (tjb + 1) * Fb.occ_frac;
     const int kmin = std::abs(twoj_a - tjb) / 2;
@@ -767,7 +767,7 @@ void HartreeFock::vex_psia_core(const DiracSpinor &Fa, DiracSpinor &VxFa) const
       const auto Labk = m_Yab.Ck().get_Lambdakab(k, Fa.k, Fb.k);
       if (Labk == 0)
         continue;
-      for (auto i = 0u; i < Fb.pinf; i++) {
+      for (auto i = 0u; i < Fb.max_pt(); i++) {
         const auto v = -x_tjbp1 * Labk * vabk[std::size_t(k - kmin)][i];
         VxFa.f[i] += v * Fb.f[i];
         VxFa.g[i] += v * Fb.g[i];
@@ -785,15 +785,15 @@ DiracSpinor vexFa(const DiracSpinor &Fa, const std::vector<DiracSpinor> &core,
 {
   [[maybe_unused]] auto sp = IO::Profile::safeProfiler(__func__);
   DiracSpinor VxFa(Fa.n, Fa.k, Fa.rgrid);
-  VxFa.pinf = Fa.pinf; // nb: updated below!
-  // note: VxFa.pinf can be larger than psi.pinf!
+  VxFa.set_max_pt() = Fa.max_pt(); // nb: updated below!
+  // note: VxFa.max_pt() can be larger than psi.max_pt()!
 
   std::vector<double> vabk(Fa.rgrid->num_points());
 
   const auto tja = Fa.twoj();
   const auto la = Fa.l();
   for (const auto &Fb : core) {
-    VxFa.pinf = std::max(Fb.pinf, VxFa.pinf);
+    VxFa.set_max_pt() = std::max(Fb.max_pt(), VxFa.max_pt());
     const auto tjb = Fb.twoj();
     const auto lb = Fb.l();
     const double x_tjbp1 = (Fa == Fb) ? (tjb + 1) : (tjb + 1) * Fb.occ_frac;
@@ -805,9 +805,9 @@ DiracSpinor vexFa(const DiracSpinor &Fa, const std::vector<DiracSpinor> &core,
       const auto tjs = Angular::threej_2(tjb, tja, 2 * k, -1, 1, 0);
       if (tjs == 0)
         continue;
-      Coulomb::yk_ab(Fb, Fa, k, vabk, Fb.pinf);
+      Coulomb::yk_ab(Fb, Fa, k, vabk, Fb.max_pt());
       const auto factor = -x_tjbp1 * tjs * tjs;
-      for (auto i = 0u; i < Fb.pinf; i++) {
+      for (auto i = 0u; i < Fb.max_pt(); i++) {
         VxFa.f[i] += factor * vabk[i] * Fb.f[i];
         VxFa.g[i] += factor * vabk[i] * Fb.g[i];
       } // r
@@ -876,7 +876,7 @@ void HartreeFock::hf_orbital(DiracSpinor &Fa, double en,
     dEa *= 0.5 * (delta_Norm) / (Fa * dFa);
     eps = std::abs(dEa / en);
     en += dEa;
-    dFa.pinf = Fa.pinf;
+    dFa.set_max_pt() = Fa.max_pt();
     Fa -= (dEa / de0) * dFa;
   }
   Fa.en = en;
@@ -932,7 +932,7 @@ void HartreeFock::brueckner_orbital(DiracSpinor &Fa, double en,
     dEa *= 0.5 * (Fa * Fa - 1.0) / (Fa * dFa);
     eps = std::abs(dEa / en);
     en += dEa;
-    dFa.pinf = Fa.pinf;
+    dFa.set_max_pt() = Fa.max_pt();
     Fa -= (dEa / de0) * dFa;
   }
   Fa.en = en;

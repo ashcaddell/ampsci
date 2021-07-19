@@ -41,8 +41,8 @@ DiracSpinor TDHFbasis::form_dPsi(const DiracSpinor &Fv, const double omega,
 
   // nb: Spectrum must constain Sigma to include correlations
   DiracSpinor Xx{0, kappa_beta, Fv.rgrid};
-  Xx.p0 = Fv.pinf;
-  Xx.pinf = Fv.pinf;
+  Xx.set_min_pt() = Fv.max_pt();
+  Xx.set_max_pt() = Fv.max_pt();
   for (const auto &Fn : spectrum) {
     if (Fn.k != Xx.k || m_h->isZero(Fn.k, Fv.k) || Fv == Fn)
       continue;
@@ -87,7 +87,7 @@ double TDHFbasis::dV1(const DiracSpinor &Fa, const DiracSpinor &Fb) const {
   {
     auto kappa_n = Fa.k;
     // auto rhs = DiracSpinor(0, Fa.k, Fa.rgrid);
-    rhs.pinf = Fb.pinf;
+    rhs.set_max_pt() = Fb.max_pt();
 
     const auto ChiType = !conj ? dPsiType::X : dPsiType::Y;
     const auto EtaType = !conj ? dPsiType::Y : dPsiType::X;

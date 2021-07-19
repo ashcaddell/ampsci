@@ -69,7 +69,7 @@ void solveContinuum(DiracSpinor &Fa, const double en,
   // Transfer back to shorter array:
   Fa.f.resize(num_pointsb); // nb: this is a little dangerous!
   Fa.g.resize(num_pointsb);
-  Fa.pinf = num_pointsb - 1;
+  Fa.set_max_pt() = num_pointsb - 1;
   Fa *= sf;
 }
 

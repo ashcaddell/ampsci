@@ -52,7 +52,7 @@ void TDHF::initialise_dPsi() {
       const auto l = (pi_chla == 1) ? l_minus : l_minus + 1;
       const auto kappa = Angular::kappa_twojl(tj, l);
       m_X[ic].emplace_back(0, kappa, Fc.rgrid);
-      m_X[ic].back().pinf = Fc.pinf;
+      m_X[ic].back().set_max_pt() = Fc.max_pt();
       if (print)
         std::cout << "|" << m_X[ic].back().symbol() << "> + ";
     }
@@ -327,7 +327,7 @@ DiracSpinor TDHF::dV_rhs(const int kappa_n, const DiracSpinor &Fa, bool conj,
                          const DiracSpinor *const Fexcl, bool incl_dV) const {
 
   auto dVFa = DiracSpinor(0, kappa_n, Fa.rgrid);
-  dVFa.pinf = Fa.pinf;
+  dVFa.set_max_pt() = Fa.max_pt();
 
   const auto ChiType = !conj ? dPsiType::X : dPsiType::Y;
   const auto EtaType = !conj ? dPsiType::Y : dPsiType::X;

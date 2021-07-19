@@ -572,7 +572,7 @@ works better for k=0 (and k>=5 ?)
   DiracODE::regularAtInfinity(xI, en.re(), vl, Hmag, alpha);
 
   // Evaluate Wronskian at ~65% of the way to pinf. Should be inependent of r
-  const auto pp = std::size_t(0.65 * double(xI.pinf));
+  const auto pp = std::size_t(0.65 * double(xI.max_pt()));
   // Not sure why -ve sign here... ??? But needed to agree w/ basis version;
   const auto w = -1.0 * (xI.f[pp] * x0.g[pp] - x0.f[pp] * xI.g[pp]) / alpha;
 

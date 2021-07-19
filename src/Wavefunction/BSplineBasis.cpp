@@ -190,8 +190,8 @@ form_spline_basis(const int kappa, const std::size_t n_states,
     // NumCalc::scaleVec(phi.dg, 0.5 * alpha);
 
     auto [p0, pinf] = bspl.get_ends(i);
-    phi.pinf = pinf;
-    phi.p0 = p0;
+    phi.set_max_pt() = pinf;
+    phi.set_min_pt() = p0;
     phi.normalise(1.0);
   }
 
@@ -218,8 +218,8 @@ form_spline_basis(const int kappa, const std::size_t n_states,
     // NumCalc::scaleVec(phi.df, 0.5 * alpha);
 
     auto [p0, pinf] = bspl.get_ends(i);
-    phi.pinf = pinf;
-    phi.p0 = p0;
+    phi.set_max_pt() = pinf;
+    phi.set_min_pt() = p0;
     phi.normalise(1.0);
   }
 
@@ -337,8 +337,8 @@ void expand_basis_orbitals(std::vector<DiracSpinor> *basis,
                     ? basis->emplace_back(pqn, kappa, wf.rgrid)
                     : basis_positron->emplace_back(pqn_pstrn, kappa, wf.rgrid);
     phi.en = en;
-    phi.p0 = spl_basis[0].pinf; // yes, backwards (updated below)
-    phi.pinf = spl_basis[0].p0;
+    phi.set_min_pt() = spl_basis[0].max_pt(); // yes, backwards (updated below)
+    phi.set_max_pt() = spl_basis[0].min_pt();
     auto sign = pvec[0] > 0 ? 1 : -1; // mostly, but not completely, works
     for (std::size_t ib = 0; ib < spl_basis.size(); ++ib) {
       phi += sign * pvec[ib] * spl_basis[ib];

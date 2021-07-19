@@ -81,7 +81,7 @@ void fitParametric(const IO::InputBlock &input, const Wavefunction &wf) {
     for (auto &phi : wf_prm.valence) {
       // const auto njl = phi.symbol().c_str();
       // double rinf = wf.rinf(phi);
-      double rinf = wf.rgrid->r()[phi.pinf - 1];
+      double rinf = wf.rgrid->r()[phi.max_pt() - 1];
       double eni = phi.en;
       double enT = states[std::size_t(i++)].en;
       printf("%7s %2i  %3.0f %3i  %5.0e  %13.7f  %11.4f %8.2f%%\n",

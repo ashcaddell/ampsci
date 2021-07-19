@@ -156,7 +156,7 @@ void boundState(DiracSpinor &psi, const double en0,
   // store energy etc.
   psi.en = t_en;
   psi.eps = t_eps;
-  psi.pinf = (std::size_t)t_pinf;
+  psi.set_max_pt() = (std::size_t)t_pinf;
   psi.its = t_its;
 
   // Explicitely set 'tail' to zero (we may be re-using orbital)
@@ -179,7 +179,7 @@ void regularAtOrigin(DiracSpinor &Fa, const double en,
       Adams::findPracticalInfinity(Fa.en, v, gr->r(), Param::cALR);
   Adams::DiracMatrix Hd(*gr, v, Fa.k, Fa.en, alpha, H_mag);
   Adams::outwardAM(Fa.f, Fa.g, Hd, pinf - 1);
-  Fa.pinf = pinf;
+  Fa.set_max_pt() = pinf;
   // for safety: make sure zerod! (I may re-use existing orbitals!)
   Fa.zero_boundaries();
 }
@@ -196,7 +196,7 @@ void regularAtInfinity(DiracSpinor &Fa, const double en,
       Adams::findPracticalInfinity(Fa.en, v, gr->r(), Param::cALR);
   Adams::DiracMatrix Hd(*gr, v, Fa.k, Fa.en, alpha, H_mag);
   Adams::inwardAM(Fa.f, Fa.g, Hd, 0, pinf - 1);
-  Fa.pinf = pinf;
+  Fa.set_max_pt() = pinf;
   // for safety: make sure zerod! (I may re-use existing orbitals!)
   Fa.zero_boundaries();
 }

@@ -294,8 +294,8 @@ inline std::vector<double> UnitTest::helper::yk_naive(const DiracSpinor &Fa,
                   (Fa.f[j] * Fb.f[j] + Fa.g[j] * Fb.g[j]));
     }
 
-    const auto p0 = std::max(Fa.p0, Fb.p0);
-    const auto pi = std::min(Fa.pinf, Fb.pinf);
+    const auto p0 = std::max(Fa.min_pt(), Fb.min_pt());
+    const auto pi = std::min(Fa.max_pt(), Fb.max_pt());
     yk[i] = NumCalc::integrate(gr.du(), p0, pi, f, gr.drdu());
   }
 

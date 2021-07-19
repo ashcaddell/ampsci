@@ -73,12 +73,12 @@ DiracSpinor TensorOperator::radial_rhs(const int kappa_a,
 
   const auto &gr = *(Fb.rgrid);
   DiracSpinor dF(0, kappa_a, Fb.rgrid);
-  dF.p0 = Fb.p0;
-  dF.pinf = Fb.pinf;
+  dF.set_min_pt() = Fb.min_pt();
+  dF.set_max_pt() = Fb.max_pt();
 
   if (isZero(kappa_a, Fb.k)) {
-    dF.p0 = Fb.p0;
-    dF.pinf = Fb.p0;
+    dF.set_min_pt() = Fb.min_pt();
+    dF.set_max_pt() = Fb.min_pt();
     return dF;
   }
 
@@ -95,12 +95,12 @@ DiracSpinor TensorOperator::radial_rhs(const int kappa_a,
   const auto cgf = angularCgf(kappa_a, Fb.k);
 
   if (m_vec.empty()) {
-    for (auto i = Fb.p0; i < Fb.pinf; i++) {
+    for (auto i = Fb.min_pt(); i < Fb.max_pt(); i++) {
       dF.f[i] = m_constant * (cff * df[i] + cfg * dg[i]);
       dF.g[i] = m_constant * (cgf * df[i] + cgg * dg[i]);
     }
   } else {
-    for (auto i = Fb.p0; i < Fb.pinf; i++) {
+    for (auto i = Fb.min_pt(); i < Fb.max_pt(); i++) {
       dF.f[i] = m_constant * m_vec[i] * (cff * df[i] + cfg * dg[i]);
       dF.g[i] = m_constant * m_vec[i] * (cgf * df[i] + cgg * dg[i]);
     }
@@ -124,8 +124,8 @@ double TensorOperator::radialIntegral(const DiracSpinor &Fa,
   // const auto cfg = angularCfg(Fa.k, Fb.k);
   // const auto cgf = angularCgf(Fa.k, Fb.k);
   //
-  // auto p0 = std::max(Fa.p0, Fb.p0);
-  // auto pinf = std::min(Fa.pinf, Fb.pinf);
+  // auto p0 = std::max(Fa.min_pt(), Fb.min_pt());
+  // auto pinf = std::min(Fa.max_pt(), Fb.max_pt());
   // double radint = 0.0;
   //
   // // df is either just fb, or dFb/dr

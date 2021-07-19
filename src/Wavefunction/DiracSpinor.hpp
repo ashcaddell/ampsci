@@ -57,10 +57,14 @@ public:
   std::vector<double> f;
   //! Lower (small) radial component
   std::vector<double> g;
-  //! `practical zero': p0 is first non-zero point for f(r) [usually p0=0]
-  std::size_t p0 = 0;
-  //! `practical infinity': pinf is last non-zero point for f(r)
-  std::size_t pinf;
+
+  auto min_pt() const { return p0; }
+  auto &set_min_pt() { return p0; }
+  auto set_min_pt(std::size_t new_p0) { p0 = new_p0; }
+
+  auto max_pt() const { return pinf; }
+  auto &set_max_pt() { return pinf; }
+  auto set_max_pt(std::size_t new_pinf) { pinf = new_pinf; }
 
   //! Number of iterations until energy convergence (for latest routine only)
   int its = -1;
@@ -68,6 +72,12 @@ public:
   double eps = -1.0;
   //! Occupation fraction. =1 for closed shells. =1/(2j+1) for valence
   double occ_frac = 0.0;
+
+private:
+  //! `practical zero': p0 is first non-zero point for f(r) [usually p0=0]
+  std::size_t p0 = 0;
+  //! `practical infinity': pinf is last non-zero point for f(r)
+  std::size_t pinf;
 
 private:
   const int m_twoj;

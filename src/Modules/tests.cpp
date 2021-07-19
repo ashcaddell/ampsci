@@ -37,9 +37,9 @@ namespace Helper {
 int countNodes(const DiracSpinor &Fn)
 // Just counts the number of times orbital (f) changes sign
 {
-  double sp = Fn.f[Fn.p0 + 3];
+  double sp = Fn.f[Fn.min_pt() + 3];
   int counted_nodes = 0;
-  for (auto i = Fn.p0 + 4; i < Fn.pinf - 3; ++i) {
+  for (auto i = Fn.min_pt() + 4; i < Fn.max_pt() - 3; ++i) {
     if (sp * Fn.f[i] < 0) {
       ++counted_nodes;
       sp = Fn.f[i];
@@ -123,8 +123,8 @@ void Module_test_r0pinf(const Wavefunction &wf) {
     for (const auto &phi : *tmp_orbs) {
       auto ratios = phi.r0pinfratio();
       printf("%7s:  %.0e   %.0e   %5i/%6.2f\n", phi.symbol().c_str(),
-             std::abs(ratios.first), std::abs(ratios.second), (int)phi.pinf,
-             wf.rgrid->r()[phi.pinf - 1]);
+             std::abs(ratios.first), std::abs(ratios.second), (int)phi.max_pt(),
+             wf.rgrid->r()[phi.max_pt() - 1]);
       // std::cout << ratios.first << " " << ratios.second << "\n";
     }
     std::cout << "--------------\n";
