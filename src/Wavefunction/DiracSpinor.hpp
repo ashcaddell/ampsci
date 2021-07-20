@@ -5,7 +5,6 @@
 #include <vector>
 class Grid;
 
-//******************************************************************************
 /*!
 @brief Stores radial Dirac spinor: F_nk = (f, g)
 @details
@@ -100,9 +99,9 @@ public:
   auto max_pt() const { return m_pinf; }
   auto &set_max_pt() { return m_pinf; }
 
-  //! r0 = r[p0] (in atomic units)
+  //! r0 = r[min_pt] (in atomic units)
   double r0() const;
-  //! rinf = r[pinf]
+  //! rinf = r[max_pt]
   double rinf() const;
 
   //! Number of iterations until energy convergence (for latest routine only)
@@ -147,7 +146,7 @@ public:
   //! Returns [f[p0]/f_max , f[pinf]/f_max] - for tests
   std::pair<double, double> r0pinfratio() const;
 
-  //! rho(r) = sum_m |Psi^2|(r) = (2j+1) * x_occ * |Psi^2|(r)
+  //! rho(r) = sum_m |Psi^2|(r) = (2j+1) * x_occ * |F^2|(r)
   std::vector<double> rho() const;
 
   //! Number of occupied electrons: (2j+1)*occ_frac
@@ -155,22 +154,25 @@ public:
 
 public:
   // Operator overloads
-  friend double operator*(const DiracSpinor &lhs, const DiracSpinor &rhs);
+
+  //! Returns radial integral (Fa,Fb) = Int(fa*fb + ga*gb)
+  friend double operator*(const DiracSpinor &Fa, const DiracSpinor &Fb);
 
   DiracSpinor &operator+=(const DiracSpinor &rhs);
   DiracSpinor &operator-=(const DiracSpinor &rhs);
   friend DiracSpinor operator+(DiracSpinor lhs, const DiracSpinor &rhs);
   friend DiracSpinor operator-(DiracSpinor lhs, const DiracSpinor &rhs);
 
+  //! Scalar multiplication
   DiracSpinor &operator*=(const double x);
-  friend DiracSpinor operator*(DiracSpinor lhs, const double x);
-  friend DiracSpinor operator*(const double x, DiracSpinor rhs);
+  friend DiracSpinor operator*(DiracSpinor Fa, const double x);
+  friend DiracSpinor operator*(const double x, DiracSpinor Fa);
 
+  //! Multiplication by array (function)
   DiracSpinor &operator*=(const std::vector<double> &v);
-  friend DiracSpinor operator*(const std::vector<double> &v, DiracSpinor rhs);
+  friend DiracSpinor operator*(const std::vector<double> &v, DiracSpinor Fa);
 
-  // comparitor overloads (compares n, then kappa):
-  // nb: Some benefits to comparing by kappa then n (find)
+  //! Comparitor overloads (compares n, then kappa):
   friend bool operator==(const DiracSpinor &lhs, const DiracSpinor &rhs);
   friend bool operator!=(const DiracSpinor &lhs, const DiracSpinor &rhs);
   friend bool operator<(const DiracSpinor &lhs, const DiracSpinor &rhs);
@@ -178,7 +180,7 @@ public:
   friend bool operator<=(const DiracSpinor &lhs, const DiracSpinor &rhs);
   friend bool operator>=(const DiracSpinor &lhs, const DiracSpinor &rhs);
 
-  // Custom comparitors
+  //! Custom comparitors (for sorting): l, j, kappa_index, energy
   static bool comp_l(const DiracSpinor &lhs, const DiracSpinor &rhs) {
     return lhs.m_l < rhs.m_l;
   }
@@ -192,6 +194,8 @@ public:
     return lhs.en() < rhs.en();
   }
 
+  // Static (helper) functions:
+
   //! Returns worst |<a|b>| (or |<a|b>-1| for a=b) {val, state_names}
   static std::pair<double, std::string>
   check_ortho(const std::vector<DiracSpinor> &a,
@@ -200,15 +204,15 @@ public:
   //! Returns formatted states string (e.g., '7sp5d') given list of orbs
   static std::string state_config(const std::vector<DiracSpinor> &orbs);
 
-  // Constructs H-like (pointlike) DiracSpinor - mainly for testing
+  //! Constructs H-like (pointlike) DiracSpinor - mainly for testing
   static DiracSpinor exactHlike(int n, int k, std::shared_ptr<const Grid> rgrid,
                                 double zeff, double alpha = 0.0);
 
-  // Returns maximum (2j) found in {orbs}
+  //! Returns maximum (2j) found in {orbs}
   static int max_tj(const std::vector<DiracSpinor> &orbs);
-  // Returns maximum l found in {orbs}
+  //! Returns maximum l found in {orbs}
   static int max_l(const std::vector<DiracSpinor> &orbs);
-  // Returns maximum kappa_index found in {orbs}
+  //! Returns maximum kappa_index found in {orbs}
   static int max_kindex(const std::vector<DiracSpinor> &orbs);
 
   DiracSpinor &operator=(const DiracSpinor &);
