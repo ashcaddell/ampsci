@@ -20,7 +20,7 @@ DiracSpinor::DiracSpinor(int in_n, int in_k,
       k(in_k),
       m_f(std::vector<double>(rgrid->num_points(), 0.0)),
       m_g(m_f),
-      pinf(rgrid->num_points()),
+      m_pinf(rgrid->num_points()),
       m_twoj(AtomData::twoj_k(in_k)),
       m_l(AtomData::l_k(in_k)),
       m_parity(AtomData::parity_k(in_k)),
@@ -48,23 +48,21 @@ double DiracSpinor::norm() const { return std::sqrt((*this) * (*this)); }
 
 //******************************************************************************
 const DiracSpinor &DiracSpinor::scale(const double factor) {
-  for (std::size_t i = p0; i < pinf; ++i)
+  for (std::size_t i = m_p0; i < m_pinf; ++i)
     m_f[i] *= factor;
-  for (std::size_t i = p0; i < pinf; ++i)
+  for (std::size_t i = m_p0; i < m_pinf; ++i)
     m_g[i] *= factor;
-  // // XXX Need this for some reason!??
-  // Means something beyond pinf is hapenning!?!? XXX XXX
   // zero_boundaries(); // shouln't be needed!
   return *this;
 }
 //------------------------------------------------------------------------------
 const DiracSpinor &DiracSpinor::scale(const std::vector<double> &v) {
-  const auto max = std::min(pinf, v.size());
-  for (std::size_t i = p0; i < max; ++i) {
+  const auto max = std::min(m_pinf, v.size());
+  for (std::size_t i = m_p0; i < max; ++i) {
     m_f[i] *= v[i];
     m_g[i] *= v[i];
   }
-  for (std::size_t i = max; i < pinf; ++i) {
+  for (std::size_t i = max; i < m_pinf; ++i) {
     m_f[i] = 0;
     m_g[i] = 0;
   }
@@ -76,11 +74,11 @@ void DiracSpinor::normalise(double norm_to) { scale(norm_to / norm()); }
 
 //------------------------------------------------------------------------------
 void DiracSpinor::zero_boundaries() {
-  for (std::size_t i = 0; i < p0; ++i) {
+  for (std::size_t i = 0; i < m_p0; ++i) {
     m_f[i] = 0.0;
     m_g[i] = 0.0;
   }
-  for (std::size_t i = pinf; i < m_f.size(); ++i) {
+  for (std::size_t i = m_pinf; i < m_f.size(); ++i) {
     m_f[i] = 0.0;
     m_g[i] = 0.0;
   }
@@ -91,10 +89,10 @@ std::pair<double, double> DiracSpinor::r0pinfratio() const {
   auto max_abs_compare = [](double a, double b) {
     return std::fabs(a) < std::fabs(b);
   };
-  const auto max_pos =
-      std::max_element(m_f.begin(), m_f.begin() + long(pinf), max_abs_compare);
-  const auto r0_ratio = m_f[p0] / *max_pos;
-  const auto pinf_ratio = m_f[pinf - 1] / *max_pos;
+  const auto max_pos = std::max_element(m_f.begin(), m_f.begin() + long(m_pinf),
+                                        max_abs_compare);
+  const auto r0_ratio = m_f[m_p0] / *max_pos;
+  const auto pinf_ratio = m_f[m_pinf - 1] / *max_pos;
   return std::make_pair(r0_ratio, pinf_ratio);
   // nb: do i care about ratio to max? or just value?
 }
@@ -103,7 +101,7 @@ std::pair<double, double> DiracSpinor::r0pinfratio() const {
 std::vector<double> DiracSpinor::rho() const {
   std::vector<double> psi2;
   psi2.reserve(rgrid->num_points());
-  const auto factor = twojp1() * occ_frac;
+  const auto factor = twojp1() * m_occ_frac;
   for (auto i = 0ul; i < rgrid->num_points(); ++i) {
     psi2.emplace_back(factor * (m_f[i] * m_f[i] + m_g[i] * m_g[i]));
   }
@@ -112,12 +110,12 @@ std::vector<double> DiracSpinor::rho() const {
 
 //******************************************************************************
 int DiracSpinor::num_electrons() const {
-  return static_cast<int>(std::round((twoj() + 1) * occ_frac));
+  return static_cast<int>(std::round((twoj() + 1) * m_occ_frac));
 }
 
 //******************************************************************************
-double DiracSpinor::r0() const { return rgrid->r()[p0]; }
-double DiracSpinor::rinf() const { return rgrid->r()[pinf - 1]; }
+double DiracSpinor::r0() const { return rgrid->r()[m_p0]; }
+double DiracSpinor::rinf() const { return rgrid->r()[m_pinf - 1]; }
 
 //******************************************************************************
 //******************************************************************************
@@ -134,10 +132,10 @@ double operator*(const DiracSpinor &lhs, const DiracSpinor &rhs) {
 DiracSpinor &DiracSpinor::operator+=(const DiracSpinor &rhs) {
   assert(this->k == rhs.k);
 
-  if (rhs.max_pt() > pinf)
-    pinf = rhs.max_pt();
-  if (rhs.min_pt() < p0)
-    p0 = rhs.min_pt();
+  if (rhs.max_pt() > m_pinf)
+    m_pinf = rhs.max_pt();
+  if (rhs.min_pt() < m_p0)
+    m_p0 = rhs.min_pt();
 
   for (std::size_t i = rhs.min_pt(); i < rhs.max_pt(); i++)
     m_f[i] += rhs.m_f[i];
@@ -148,10 +146,10 @@ DiracSpinor &DiracSpinor::operator+=(const DiracSpinor &rhs) {
 DiracSpinor &DiracSpinor::operator-=(const DiracSpinor &rhs) {
   assert(this->k == rhs.k);
 
-  if (rhs.max_pt() > pinf)
-    pinf = rhs.max_pt();
-  if (rhs.min_pt() < p0)
-    p0 = rhs.min_pt();
+  if (rhs.max_pt() > m_pinf)
+    m_pinf = rhs.max_pt();
+  if (rhs.min_pt() < m_p0)
+    m_p0 = rhs.min_pt();
 
   for (std::size_t i = rhs.min_pt(); i < rhs.max_pt(); i++)
     m_f[i] -= rhs.m_f[i];
@@ -192,15 +190,18 @@ DiracSpinor operator*(const std::vector<double> &v, DiracSpinor rhs) {
   return rhs;
 }
 
+//******************************************************************************
 DiracSpinor &DiracSpinor::operator=(const DiracSpinor &other) {
   assert(*this == other); // same n and kappa
   if (this != &other) {   // same memory location
     m_en = other.m_en;
     m_f = other.m_f;
     m_g = other.m_g;
-    p0 = other.min_pt();
-    pinf = other.max_pt();
-    occ_frac = other.occ_frac;
+    m_p0 = other.min_pt();
+    m_pinf = other.max_pt();
+    m_occ_frac = other.m_occ_frac;
+    m_its = other.m_its;
+    m_eps = other.m_eps;
   }
   return *this;
 }

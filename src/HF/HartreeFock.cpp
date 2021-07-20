@@ -201,7 +201,7 @@ void HartreeFock::hf_core_approx(const double eps_target_HF) {
         std::cout << __LINE__ << "| ";
         printf(" --- %2i,%2i: en=%11.5f  HFeps = %.0e;  Adams = %.0e[%2i]  "
                "(%4i)\n",
-               Fa.n, Fa.k, Fa.en(), state_eps, Fa.eps, Fa.its,
+               Fa.n, Fa.k, Fa.en(), state_eps, Fa.eps(), Fa.its(),
                (int)Fa.max_pt());
       }
     } // core states
@@ -414,7 +414,7 @@ EpsIts HartreeFock::hf_valence_approx(DiracSpinor &Fa, double eps_target_HF)
 // Can be used to generate a set of virtual/basis orbitals
 {
   [[maybe_unused]] auto sp = IO::Profile::safeProfiler(__func__);
-  Fa.occ_frac = 1.0 / Fa.twojp1();
+  Fa.set_occ_frac() = 1.0 / Fa.twojp1();
 
   auto damper = rampedDamp(0.7, 0.3, 2, 6);
   // don't include all pts in PT for new e guess
@@ -480,11 +480,11 @@ double HartreeFock::calculateCoreEnergy() const
     const auto tja = Fa.twoj();
 
     double e1 = 0.0, e2 = 0.0, e3 = 0.0;
-    const double xtjap1 = (tja + 1) * Fa.occ_frac;
+    const double xtjap1 = (tja + 1) * Fa.occ_frac();
     e1 += xtjap1 * Fa.en();
     for (const auto &Fb : *p_core) {
       const auto tjb = Fb.twoj();
-      const double xtjbp1 = (tjb + 1) * Fb.occ_frac;
+      const double xtjbp1 = (tjb + 1) * Fb.occ_frac();
       const auto &v0bb = m_Yab.get_yk_ab(0, Fb, Fb);
       const auto R0fg2 = Fa * (v0bb * Fa);
       e2 += xtjap1 * xtjbp1 * R0fg2;
@@ -534,7 +534,7 @@ void HartreeFock::form_vdir(std::vector<double> &vdir, bool re_scale) const
       [](int n, const auto &Fa) { return n + Fa.num_electrons(); });
   const double sf = re_scale ? (1.0 - 1.0 / Ncore) : 1.0;
   for (const auto &Fb : (*p_core)) {
-    const double f_sf = sf * (Fb.twoj() + 1) * Fb.occ_frac;
+    const double f_sf = sf * (Fb.twoj() + 1) * Fb.occ_frac();
     const auto &v0bb = m_Yab.get_yk_ab(0, Fb, Fb);
     for (std::size_t i = 0; i < rgrid->num_points(); i++) {
       vdir[i] += v0bb[i] * f_sf;
@@ -621,7 +621,7 @@ void HartreeFock::form_approx_vex_core_a(const DiracSpinor &Fa,
       if (Fb == Fa)
         continue;
       const auto tjb = Fb.twoj();
-      const double x_tjbp1 = (tjb + 1) * Fb.occ_frac;
+      const double x_tjbp1 = (tjb + 1) * Fb.occ_frac();
       const auto irmax = std::min(Fa.max_pt(), Fb.max_pt());
       const int kmin = std::abs(twoj_a - tjb) / 2;
       const int kmax = (twoj_a + tjb) / 2;
@@ -693,7 +693,7 @@ std::vector<double> vex_approx(const DiracSpinor &Fa,
   for (const auto &Fb : core) {
     const auto tjb = Fb.twoj();
     const auto lb = Fb.l();
-    const double x_tjbp1 = (tjb + 1) * Fb.occ_frac; // when in core??
+    const double x_tjbp1 = (tjb + 1) * Fb.occ_frac(); // when in core??
     const auto irmax = std::min(Fa.max_pt(), Fb.max_pt());
     const int kmin = std::abs(tja - tjb) / 2;
     int kmax = (tja + tjb) / 2;
@@ -761,7 +761,7 @@ void HartreeFock::vex_psia_core(const DiracSpinor &Fa, DiracSpinor &VxFa) const
   for (const auto &Fb : (*p_core)) {
     VxFa.set_max_pt() = std::max(VxFa.max_pt(), Fb.max_pt());
     const auto tjb = Fb.twoj();
-    const double x_tjbp1 = (Fa == Fb) ? (tjb + 1) : (tjb + 1) * Fb.occ_frac;
+    const double x_tjbp1 = (Fa == Fb) ? (tjb + 1) : (tjb + 1) * Fb.occ_frac();
     const int kmin = std::abs(twoj_a - tjb) / 2;
     const int kmax = (twoj_a + tjb) / 2;
     const auto &vabk = m_Yab.get_y_ab(Fb, Fa);
@@ -798,7 +798,7 @@ DiracSpinor vexFa(const DiracSpinor &Fa, const std::vector<DiracSpinor> &core,
     VxFa.set_max_pt() = std::max(Fb.max_pt(), VxFa.max_pt());
     const auto tjb = Fb.twoj();
     const auto lb = Fb.l();
-    const double x_tjbp1 = (Fa == Fb) ? (tjb + 1) : (tjb + 1) * Fb.occ_frac;
+    const double x_tjbp1 = (Fa == Fb) ? (tjb + 1) : (tjb + 1) * Fb.occ_frac();
     const int kmin = std::abs(tja - tjb) / 2;
     const int kmax = std::min((tja + tjb) / 2, k_cut);
     for (int k = kmin; k <= kmax; k++) {
@@ -882,8 +882,8 @@ void HartreeFock::hf_orbital(DiracSpinor &Fa, double en,
     Fa -= (dEa / de0) * dFa;
   }
   Fa.set_en() = en;
-  Fa.eps = eps;
-  Fa.its = tries;
+  Fa.set_eps() = eps;
+  Fa.set_its() = tries;
   if (tries == 0 || tries == m_max_hf_its)
     Fa.normalise(); //? Not needed
 }
@@ -938,8 +938,8 @@ void HartreeFock::brueckner_orbital(DiracSpinor &Fa, double en,
     Fa -= (dEa / de0) * dFa;
   }
   Fa.set_en() = en;
-  Fa.eps = eps;
-  Fa.its = tries;
+  Fa.set_eps() = eps;
+  Fa.set_its() = tries;
   Fa.normalise();
 }
 

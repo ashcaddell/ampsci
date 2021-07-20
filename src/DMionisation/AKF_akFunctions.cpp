@@ -169,7 +169,7 @@ int calculateK_nk(const Wavefunction &wf, std::size_t is, int max_L, double dE,
     cntm.solveLocalContinuum(ec, lc_min, lc_max);
   }
 
-  double x_ocf = psi.occ_frac; // occupancy fraction. Usually 1
+  double x_ocf = psi.occ_frac(); // occupancy fraction. Usually 1
 
   // Generate AK for each L, lc, and q
   // L and lc are summed, not stored indevidually

@@ -353,7 +353,7 @@ void Wavefunction::solveLocalCore(const std::string &str_core, int log_dele_or)
     if (k1 != 0) {
       auto &new_Fc = core.emplace_back(n, k1, rgrid);
       solveDirac(new_Fc, en_a, log_dele_or);
-      new_Fc.occ_frac = double(num) / (4 * l + 2);
+      new_Fc.set_occ_frac() = double(num) / (4 * l + 2);
       en_a = 0.95 * new_Fc.en();
       if (en_a > 0)
         en_a = enGuessCore(n, l);
@@ -361,7 +361,7 @@ void Wavefunction::solveLocalCore(const std::string &str_core, int log_dele_or)
     int k2 = -(l + 1); // j=l+1/2
     auto &new_Fc = core.emplace_back(n, k2, rgrid);
     solveDirac(new_Fc, en_a, log_dele_or);
-    new_Fc.occ_frac = double(num) / (4 * l + 2);
+    new_Fc.set_occ_frac() = double(num) / (4 * l + 2);
   }
 }
 
@@ -619,10 +619,10 @@ void Wavefunction::printCore(bool sorted) const
     const auto &phi = core[i];
     auto r_inf = rgrid->r()[phi.max_pt() - 1]; // rinf(phi);
     printf("%2i) %7s %2i  %5.1f %2i  %5.0e %15.9f %15.3f", int(i),
-           phi.symbol().c_str(), phi.k, r_inf, phi.its, phi.eps, phi.en(),
+           phi.symbol().c_str(), phi.k, r_inf, phi.its(), phi.eps(), phi.en(),
            phi.en() * PhysConst::Hartree_invcm);
-    if (phi.occ_frac < 1.0)
-      printf("     [%4.2f]\n", phi.occ_frac);
+    if (phi.occ_frac() < 1.0)
+      printf("     [%4.2f]\n", phi.occ_frac());
     else
       std::cout << "\n";
   }
@@ -655,7 +655,7 @@ void Wavefunction::printValence(
     const auto &phi = tmp_orbs[i];
     auto r_inf = rgrid->r()[phi.max_pt() - 1]; // rinf(phi);
     printf("%2i) %7s %2i  %5.1f %2i  %5.0e %15.9f %15.3f", int(i),
-           phi.symbol().c_str(), phi.k, r_inf, phi.its, phi.eps, phi.en(),
+           phi.symbol().c_str(), phi.k, r_inf, phi.its(), phi.eps(), phi.en(),
            phi.en() * PhysConst::Hartree_invcm);
     printf(" %10.2f\n", (phi.en() - e0) * PhysConst::Hartree_invcm);
   }
@@ -669,8 +669,8 @@ void Wavefunction::printBasis(const std::vector<DiracSpinor> &the_basis,
   const auto index_list = sortedEnergyList(the_basis, sorted);
   for (const auto i : index_list) {
     const auto &phi = the_basis[i];
-    const auto r_0 = rgrid->r()[phi.min_pt()];
-    const auto r_inf = rgrid->r()[phi.max_pt() - 1];
+    const auto r_0 = phi.r0();
+    const auto r_inf = phi.rinf();
 
     const auto *hf_phi = getState(phi.n, phi.k);
     if (hf_phi != nullptr) {
@@ -691,7 +691,7 @@ void Wavefunction::printBasis(const std::vector<DiracSpinor> &the_basis,
 std::vector<double> Wavefunction::coreDensity() const {
   std::vector<double> rho(rgrid->num_points(), 0.0);
   for (const auto &phi : core) {
-    auto f = double(phi.twoj() + 1) * phi.occ_frac;
+    auto f = double(phi.twoj() + 1) * phi.occ_frac();
     for (auto i = 0ul; i < rgrid->num_points(); i++) {
       rho[i] += f * (phi.f(i) * phi.f(i) + phi.g(i) * phi.g(i));
     }

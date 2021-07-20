@@ -55,12 +55,12 @@ bool DiracODE(std::ostream &obuff) {
 
   { // Check convergence:
     const auto comp_eps = [](const auto &Fa, const auto &Fb) {
-      return Fa.eps < Fb.eps;
+      return Fa.eps() < Fb.eps();
     };
     const auto worst_F =
         std::max_element(cbegin(orbitals), cend(orbitals), comp_eps);
     pass &= qip::check_value(&obuff, "converge " + worst_F->shortSymbol(),
-                             worst_F->eps, 0.0, 1.0e-14);
+                             worst_F->eps(), 0.0, 1.0e-14);
   }
 
   { // Check orthogonality of orbitals:

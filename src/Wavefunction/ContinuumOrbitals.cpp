@@ -128,7 +128,7 @@ int ContinuumOrbitals::solveLocalContinuum(double ec, int min_l, int max_l)
         DiracODE::solveContinuum(phi, ec, vtot, cgrid, r_asym, alpha);
         const auto nn = phi * phi;
         const auto eps = std::abs((nn - n0) / n0);
-        phi.eps = eps;
+        phi.set_eps() = eps;
         // std::cout << iteration << "_ " << eps << "\n";
         if (eps < 1.0e-7)
           break;

@@ -155,9 +155,9 @@ void boundState(DiracSpinor &psi, const double en0,
 
   // store energy etc.
   psi.set_en() = t_en;
-  psi.eps = t_eps;
+  psi.set_eps() = t_eps;
   psi.set_max_pt() = (std::size_t)t_pinf;
-  psi.its = t_its;
+  psi.set_its() = t_its;
 
   // Explicitely set 'tail' to zero (we may be re-using orbital)
   psi.zero_boundaries();
