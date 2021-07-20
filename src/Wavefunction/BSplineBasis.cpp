@@ -10,7 +10,6 @@
 #include "Maths/NumCalc_quadIntegrate.hpp"
 #include "Physics/AtomData.hpp"
 #include "Wavefunction/DiracSpinor.hpp"
-#include "Wavefunction/Hamiltonian.hpp"
 #include "Wavefunction/Wavefunction.hpp"
 #include "qip/Vector.hpp"
 #include <algorithm>
@@ -244,9 +243,9 @@ fill_Hamiltonian_matrix(const std::vector<DiracSpinor> &spl_basis,
   const auto VBr = wf.getHF() ? wf.getHF()->get_Breit() : nullptr;
 
   // Move this into wf ??
-  auto Hd = RadialHamiltonian(wf.rgrid, wf.alpha);
-  Hd.set_v(-1, wf.get_Vlocal(0)); // same each kappa //XXX
-  Hd.set_v_mag(wf.get_Hmag(0));   // Magnetic QED form-factor [usually empty]
+  // auto Hd = RadialHamiltonian(wf.rgrid, wf.alpha);
+  // Hd.set_v(-1, wf.get_Vlocal(0)); // same each kappa //XXX
+  // Hd.set_v_mag(wf.get_Hmag(0));   // Magnetic QED form-factor [usually empty]
 
 #pragma omp parallel for
   for (auto i = 0ul; i < Aij.n; i++) {
@@ -259,7 +258,7 @@ fill_Hamiltonian_matrix(const std::vector<DiracSpinor> &spl_basis,
       // for (auto j = 0ul; j < Aij.n; j++) {
       const auto &sj = spl_basis[j];
 
-      auto aij = Hd.matrixEl(sj, si);
+      auto aij = wf.Hab(sj, si);
       if (!excl_exch)
         aij += (sj * VexSi);
       if (sigmaQ)

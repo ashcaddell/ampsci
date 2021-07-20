@@ -8,6 +8,7 @@
 #include "MBPT/GoldstoneSigma.hpp"
 #include "Maths/Grid.hpp"
 #include "Maths/Interpolator.hpp"
+#include "Maths/NumCalc_quadIntegrate.hpp"
 #include "Physics/AtomData.hpp"
 #include "Physics/NuclearPotentials.hpp"
 #include "Physics/Parametric_potentials.hpp"
@@ -887,4 +888,46 @@ std::vector<double> Wavefunction::get_Vlocal(int l) const {
 //******************************************************************************
 std::vector<double> Wavefunction::get_Hmag(int l) const {
   return qed ? qed->Hmag(l) : std::vector<double>{};
+}
+
+//******************************************************************************
+double Wavefunction::Hab(const DiracSpinor &Fa, const DiracSpinor &Fb) const {
+  if (Fa.k != Fb.k)
+    return 0.0;
+  const auto kappa = Fa.k;
+  const auto max = std::min(Fa.max_pt(), Fb.max_pt());
+  const auto min = std::max(Fa.min_pt(), Fb.min_pt());
+  const auto &drdu = Fa.rgrid->drdu();
+
+  const auto the_same = &Fa == &Fb;
+
+  auto dga = NumCalc::derivative(Fa.g(), drdu, Fb.rgrid->du(), 1);
+  auto dgb =
+      the_same ? dga : NumCalc::derivative(Fb.g(), drdu, Fb.rgrid->du(), 1);
+
+  for (std::size_t i = min; i < max; i++) {
+    const auto r = Fa.rgrid->r(i);
+    dga[i] -= (kappa * Fa.g(i) / r);
+    dgb[i] -= (kappa * Fb.g(i) / r);
+  }
+
+  const auto D1m2 = NumCalc::integrate(1.0, min, max, Fa.f(), dgb, drdu) +
+                    NumCalc::integrate(1.0, min, max, Fb.f(), dga, drdu);
+
+  const auto Sab = NumCalc::integrate(1.0, min, max, Fa.g(), Fb.g(), drdu);
+
+  const auto &v = get_Vlocal(Fa.l());
+  const auto Vab = NumCalc::integrate(1.0, min, max, Fa.f(), Fb.f(), v, drdu) +
+                   NumCalc::integrate(1.0, min, max, Fa.g(), Fb.g(), v, drdu);
+
+  const auto &Hmag = get_Hmag(Fa.l());
+
+  const auto V_mag =
+      Hmag.empty()
+          ? 0.0
+          : NumCalc::integrate(1.0, min, max, Fa.f(), Fb.g(), Hmag, drdu) +
+                NumCalc::integrate(1.0, min, max, Fa.g(), Fb.f(), Hmag, drdu);
+  const auto c = 1.0 / alpha;
+
+  return (Vab - c * (D1m2 + 2.0 * c * Sab + V_mag)) * Fa.rgrid->du();
 }

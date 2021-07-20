@@ -255,6 +255,9 @@ public: // const methods: "views" into WF object
   std::vector<double> get_Vlocal(int l = 0) const;
   std::vector<double> get_Hmag(int l = 0) const;
 
+  //! Returns <a|H|b> for Hamiltonian H (inludes Rad.pot, NOT sigma or Breit)
+  double Hab(const DiracSpinor &Fa, const DiracSpinor &Fb) const;
+
 private:
   void determineCore(const std::string &str_core_in);
   static std::vector<std::size_t>
