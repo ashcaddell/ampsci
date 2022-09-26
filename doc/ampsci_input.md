@@ -2,7 +2,7 @@
 
 \brief ampsci input: descriptions of file format and available options
 
-[[Home](/README.md)]
+[[Home](README.md)]
 
 ## basic usage
 
@@ -113,7 +113,7 @@ The general usage of the code is to first use the main blocks to construct the
 atomic wavefunction and basis states, then to add as many 'Module::' blocks as
 required. Each module is a seperate routine that will take the calculated
 wavefunction and compute any desired property (e.g., matrix elements). The code
-is designed such that anyone can write a new Module (See [doc/writing_modules.md](/doc/writing_modules.md))
+is designed such that anyone can write a new Module (See [doc/writing_modules.md](doc/writing_modules.md))
 
 e.g., To calculate Cs wavefunctions at HF level with 6s, 6p, and 5d valence
 states, and then calculate E1 matrix elements including core polarisation (RPA):
@@ -173,8 +173,8 @@ You can also access most of the self-documenation directly from the command-line
 * `./ampsci -m  <ModuleName>`
   * Prints list of available Modules (same as --modules)
   * ModuleName is optional. If given, will list avaiable options for that Module
-* See [doc/modules.md](/doc/modules.md) for full details
-* The code is designed so that you can easily create your own modules. See [doc/writing_modules.md](/doc/writing_modules.md) for details
+* See [doc/modules.md](doc/modules.md) for full details
+* The code is designed so that you can easily create your own modules. See [doc/writing_modules.md](doc/writing_modules.md) for details
 
 --------------------------------------------------------------------------------
 

@@ -2,7 +2,7 @@
 
 \brief Compilation instructions for Linux, Mac, and Windows
 
-[[Home](/README.md)]
+[[Home](README.md)]
 
 * Easiest method is to compile using provided Makefile:
 * Copy "doc/examples/Makefile" from doc/ directory to the working directory
